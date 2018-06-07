@@ -14,6 +14,7 @@ class EntityValidate {
                     agent: EntitySchema.agent.required(),
                     uiColor: EntitySchema.uiColor,
                     regex: EntitySchema.regex.allow('').allow(null),
+                    type: EntitySchema.type.default('learned').valid('learned','regex').error(new Error('Please provide a valid type for the entity. Supported languages are: learned, regex')),
                     examples: Joi.array().items({
                         value: ExampleSchema.value.required(),
                         synonyms: ExampleSchema.synonyms.required()
@@ -53,6 +54,7 @@ class EntityValidate {
                     entityName: EntitySchema.entityName,
                     uiColor: EntitySchema.uiColor,
                     regex: EntitySchema.regex.allow('').allow(null),
+                    type: EntitySchema.type.default('learned').valid('learned','regex').error(new Error('Please provide a valid type for the entity. Supported languages are: learned, regex')),
                     examples: Joi.array().items({
                         value: ExampleSchema.value.required(),
                         synonyms: ExampleSchema.synonyms.required()
