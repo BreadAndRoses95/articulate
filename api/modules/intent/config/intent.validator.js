@@ -103,7 +103,8 @@ class IntentValidate {
                         isRequired: SlotSchema.isRequired.required().error(new Error('Please specify if the slot is required or not.')),
                         textPrompts: SlotSchema.textPrompts
                     }),
-                    intentResponses: ScenarioSchema.intentResponses
+                    intentResponses: ScenarioSchema.intentResponses,
+                    followUpIntents : ScenarioSchema.followUpIntents.optional()
                 };
             })()
         };
@@ -135,7 +136,8 @@ class IntentValidate {
                         isRequired: SlotSchema.isRequired.required(),
                         textPrompts: SlotSchema.textPrompts
                     }),
-                    intentResponses: ScenarioSchema.intentResponses
+                    intentResponses: ScenarioSchema.intentResponses,
+                    followUpIntents : ScenarioSchema.followUpIntents.optional()
                 };
             })()
         };

@@ -4,6 +4,8 @@ const Boom = require('boom');
 const _ = require('lodash');
 const RespondIntent = require('./respondIntent.agent.tool');
 const RespondFallback = require('./respondFallback.agent.tool');
+const AgentTools = require('../tools');
+
 
 const getCurrentContext = (conversationStateObject) => {
 
@@ -97,13 +99,35 @@ const getIntentData = (conversationStateObject) => {
     if (conversationStateObject.rasaResult.intent) {
         if (conversationStateObject.agent.domains) {
             const agentIntents = _.compact(_.flatten(_.map(conversationStateObject.agent.domains, 'intents')));
+            if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length >0){
+                const intentLit = _.filter(conversationStateObject.rasaResult.intent_ranking, (intentFound)=>{
+                    return conversationStateObject.currentContext.followUpIntents.indexOf(intentFound.name) > -1
+                });
+                const intent = intentLit[0];
+                conversationStateObject.rasaResult.intent = intent;
+                // conversationStateObject.rasaResult.intent.confidence = 1;
+            }
+            //should not be able to 
             const intent = _.filter(agentIntents, (agentIntent) => {
-
-                return agentIntent.intentName === conversationStateObject.rasaResult.intent.name;
+                return agentIntent.intentName === conversationStateObject.rasaResult.intent.name ;
             })[0];
             return intent;
         }
         return null;
+    }
+    return null;
+};
+
+const getPreviousIntentData = (conversationStateObject) => {
+
+    if (conversationStateObject.currentContext && conversationStateObject.currentContext.name) {
+
+        const agentIntents = _.compact(_.flatten(_.map(conversationStateObject.agent.domains, 'intents')));
+        const intent = _.filter(agentIntents, (agentIntent) => {
+
+            return agentIntent.intentName === conversationStateObject.currentContext.name;
+        })[0];
+        return intent;
     }
     return null;
 };
@@ -127,17 +151,62 @@ const getLastContextWithValidSlots = (conversationStateObject, recognizedEntitie
     return lastValidContext;
 };
 
+
+const findIsActionIncomplete = (conversationStateObject) => {
+    let previousIsActionIncomplete = false;
+    let isActionIncomplete = false;
+    if (conversationStateObject.lastIntent) {
+        const requiredSlots = _.filter(conversationStateObject.lastIntent.scenario.slots, (slot) => {
+
+            conversationStateObject.context[conversationStateObject.context.length - 1].slots[slot.slotName] = conversationStateObject.currentContext.slots[slot.slotName] ? conversationStateObject.currentContext.slots[slot.slotName] : '';
+            return slot.isRequired;
+        });
+        const recognizedEntities = conversationStateObject.rasaResult.entities;
+
+        const recognizedEntitiesNames = _.map(recognizedEntities, (recognizedEntity) => {
+            return recognizedEntity.entity;
+        });
+        if (conversationStateObject.currentContext.slots) {
+            let previouslyFoundEntities = _.filter(Object.keys(conversationStateObject.currentContext.slots), (slot) => {
+                return conversationStateObject.currentContext.slots[slot] !== "";
+            });
+            if (recognizedEntitiesNames.length > 0) {
+                recognizedEntitiesNames.push(previouslyFoundEntities);
+            }
+            const previouslymissingEntities = _.filter(requiredSlots, (slot) => {
+
+                return previouslyFoundEntities.indexOf(slot.entity) === -1 && !conversationStateObject.currentContext.slots[slot.slotName];
+            });
+            if (previouslymissingEntities.length > 0) {
+                previousIsActionIncomplete = true;
+            }
+        }
+
+        const missingEntities = _.filter(requiredSlots, (slot) => {
+
+            return recognizedEntitiesNames.indexOf(slot.entity) === -1 && !conversationStateObject.currentContext.slots[slot.slotName];
+        });
+        if (missingEntities.length > 0) {
+            isActionIncomplete = true;
+        }
+        return previousIsActionIncomplete;
+    }
+    return false;
+}
+
+
 const persistContext = (server, conversationStateObject, cb) => {
 
     Async.map(conversationStateObject.context, (elementInContext, callbackInsertInContext) => {
 
-        if (elementInContext.id) {
-            if (elementInContext.slots) {
+        if (elementInContext.id ) {
+            if (elementInContext.slots || elementInContext.followUpIntents) {
                 const options = {
                     url: `/context/${conversationStateObject.sessionId}/${elementInContext.id}`,
                     method: 'PUT',
                     payload: {
-                        slots: elementInContext.slots
+                        slots: elementInContext.slots,
+                        followUpIntents : elementInContext.followUpIntents
                     }
                 };
 
@@ -183,12 +252,26 @@ const persistContext = (server, conversationStateObject, cb) => {
     });
 };
 
-module.exports = (server, conversationStateObject, callback) => {
+module.exports = (server, conversationStateObject,  callback, followUpIntent = false) => {
+    var isActionIncomplete = false;
 
     conversationStateObject.currentContext = getCurrentContext(conversationStateObject);
     if (conversationStateObject.parse) {
         conversationStateObject.rasaResult = getBestRasaResult(conversationStateObject);
-        conversationStateObject.intent = getIntentData(conversationStateObject);
+
+        conversationStateObject.lastIntent = getPreviousIntentData(conversationStateObject);
+
+        isActionIncomplete = findIsActionIncomplete(conversationStateObject);
+
+        // If last action was complete : we just moved from one intent to the same/another
+        if ((!conversationStateObject.currentContext) || ( !isActionIncomplete)) {
+                conversationStateObject.intent = getIntentData(conversationStateObject);
+        }
+        else {
+            conversationStateObject.intent = conversationStateObject.lastIntent;
+            conversationStateObject.rasaResult.intent.name = conversationStateObject.intent.intentName;
+            conversationStateObject.rasaResult.intent.confidence = 1;
+        }
         conversationStateObject.scenario = conversationStateObject.intent ? conversationStateObject.intent.scenario : null;
         if (conversationStateObject.intent && !conversationStateObject.scenario) {
             RespondFallback(conversationStateObject, (err, response) => {
@@ -206,13 +289,18 @@ module.exports = (server, conversationStateObject, callback) => {
             });
         }
         else {
+            //TODO : remove this,  generic case
             conversationStateObject.domain = getDomainOfIntent(conversationStateObject);
             if (conversationStateObject.intent && conversationStateObject.scenario && conversationStateObject.domain && conversationStateObject.rasaResult.intent.confidence > conversationStateObject.domain.intentThreshold) {
                 if (!conversationStateObject.currentContext || (conversationStateObject.rasaResult.intent.name !== conversationStateObject.currentContext.name)) {
+                    let slots = {};
+                    if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length > 0){
+                        slots = Object.assign(slots,conversationStateObject.currentContext.slots);
+                    }
                     conversationStateObject.context.push({
                         name: conversationStateObject.rasaResult.intent.name,
                         scenario: conversationStateObject.scenario.scenarioName,
-                        slots: {}
+                        slots: slots
                     });
                     conversationStateObject.currentContext = getCurrentContext(conversationStateObject);
                 }
@@ -228,9 +316,12 @@ module.exports = (server, conversationStateObject, callback) => {
                         }
                         return callback(null, response);
                     });
+
+
                 });
             }
             else {
+                //TODO : remove this : confidence lower than threshold : should not happen
                 const recognizedEntities = !conversationStateObject.rasaResult.intent ? conversationStateObject.rasaResult.entities : getEntitiesFromRasaResults(conversationStateObject.parse);
                 if (conversationStateObject.currentContext) {
                     if (recognizedEntities.length > 0) {

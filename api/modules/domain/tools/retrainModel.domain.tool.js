@@ -11,8 +11,8 @@ const retrainModel = (server, rasa, language, agentName, agentId, domainName, do
 
     let model = Guid.create().toString();
     Async.waterfall([
-        (cb) => {
-
+        (cb) => { 
+ 
             BuildTrainingData(server, domainId, extraTrainingData, (err, trainingSet) => {
 
                 if (err){

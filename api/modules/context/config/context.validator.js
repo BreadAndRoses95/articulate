@@ -18,7 +18,8 @@ class ContextValidate {
                 return {
                     name: ContextSchema.name.required(),
                     scenario: ContextSchema.scenario.required(),
-                    slots: ContextSchema.slots
+                    slots: ContextSchema.slots,
+                    followUpIntents : ContextSchema.followUpIntents.optional()
                 };
             })()
         };
@@ -43,7 +44,8 @@ class ContextValidate {
             payload: (() => {
 
                 return {
-                    slots: ContextSchema.slots
+                    slots: ContextSchema.slots,
+                    followUpIntents: ContextSchema.followUpIntents.optional()
                 };
             })()
         };

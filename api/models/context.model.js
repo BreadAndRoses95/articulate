@@ -8,7 +8,8 @@ class ScenarioModel {
             id: Joi.number(),
             name: Joi.string().trim(),
             scenario: Joi.string().trim(),
-            slots: Joi.object()
+            slots: Joi.object(),
+            followUpIntents: Joi.array().items(Joi.string().trim())
         };
     };
 }

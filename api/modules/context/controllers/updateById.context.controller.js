@@ -61,8 +61,12 @@ module.exports = (request, reply) => {
             });
         },
         (currentContext, cb) => {
-
-            currentContext.slots = updateData.slots;
+            if (updateData.slots){
+                currentContext.slots = updateData.slots;
+            }
+            if (updateData.followUpIntents){
+                currentContext.followUpIntents = updateData.followUpIntents;
+            }
             const flatContextElement = Flat(currentContext);
             const flatUpdateData = Flat(updateData);
             Object.keys(flatUpdateData).forEach( (key) => {

@@ -13,6 +13,7 @@ const StartDB = require('./helpers/startDB');
 module.exports = (callback) => init(callback);
 
 const init = (callback) => {
+    console.log("ahhh")
 
     return Async.series({ redis: initRedis, server: initHapi },
         (err, results) => {
@@ -55,7 +56,7 @@ const retryStrategy = (options) => {
 const initRedis = (next) => {
 
     const redisPort = process.env.REDIS_PORT || 6379;
-    const redisHost = process.env.REDIS_HOST || 'redis';
+    const redisHost = process.env.REDIS_HOST || 'localhost';
 
     const client = Redis.createClient(redisPort, redisHost, { retry_strategy: retryStrategy });
     next = _.once(next); //Prevent calling the async next when there is an error after a successful connection

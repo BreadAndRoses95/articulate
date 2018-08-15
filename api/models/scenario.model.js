@@ -12,7 +12,8 @@ class ScenarioModel {
             intent: Joi.string().trim(),
             scenarioName: Joi.string().trim(),
             slots: Joi.array().items(SlotModel.schema),
-            intentResponses: Joi.array().items(Joi.string().trim())
+            intentResponses: Joi.array().items(Joi.string().trim()),
+            followUpIntents : Joi.array().items(Joi.string().trim())
         };
     };
 }
