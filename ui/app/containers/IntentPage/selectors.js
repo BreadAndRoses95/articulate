@@ -46,6 +46,10 @@ const makeSelectTouched = () => createSelector(
   selectIntent,
   (intentState) => intentState.touched,
 );
+const makeSelectSelectedFollowUpIntents = () => createSelector(
+  selectIntent,
+  (intentState) => intentState.selectedFollowUpIntents,
+);
 
 export {
   selectIntent,
@@ -57,5 +61,6 @@ export {
   makeSelectOldScenarioData,
   makeSelectOldWebhookData,
   makeSelectTouched,
-  makeSelectPostFormatData
+  makeSelectPostFormatData,
+  makeSelectSelectedFollowUpIntents
 };

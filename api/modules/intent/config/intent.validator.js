@@ -104,7 +104,8 @@ class IntentValidate {
                         textPrompts: SlotSchema.textPrompts
                     }),
                     intentResponses: ScenarioSchema.intentResponses,
-                    followUpIntents : ScenarioSchema.followUpIntents.optional()
+                    followUpIntents: ScenarioSchema.followUpIntents.optional(),
+                    isBlockingIntent: ScenarioSchema.isBlockingIntent.required()
                 };
             })()
         };
@@ -137,7 +138,8 @@ class IntentValidate {
                         textPrompts: SlotSchema.textPrompts
                     }),
                     intentResponses: ScenarioSchema.intentResponses,
-                    followUpIntents : ScenarioSchema.followUpIntents.optional()
+                    followUpIntents : ScenarioSchema.followUpIntents.optional(),
+                    isBlockingIntent: ScenarioSchema.isBlockingIntent.required()
                 };
             })()
         };

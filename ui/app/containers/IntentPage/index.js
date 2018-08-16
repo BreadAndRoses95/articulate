@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import Helmet from 'react-helmet';
+import Select from 'react-select';
 import {
   Col,
   Input,
@@ -14,9 +15,9 @@ import 'brace/mode/xml';
 import 'brace/mode/json';
 import 'brace/theme/terminal';
 
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import Alert from 'react-s-alert';
-import { createStructuredSelector } from 'reselect';
+import {createStructuredSelector} from 'reselect';
 import ActionButton from '../../components/ActionButton';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import Content from '../../components/Content';
@@ -46,6 +47,7 @@ import {
   makeSelectError,
   makeSelectLoading,
   makeSelectSuccess,
+  makeSelectDomainIntents
 } from '../App/selectors';
 import {
   addSlot,
@@ -87,7 +89,8 @@ import {
   makeSelectWindowSelection,
   makeSelectWebhookData,
   makeSelectOldIntentData,
-  makeSelectPostFormatData
+  makeSelectPostFormatData,
+  makeSelectSelectedFollowUpIntents
 } from './selectors';
 
 const returnFormattedOptions = (options) => options.map((option, index) => (
@@ -95,6 +98,7 @@ const returnFormattedOptions = (options) => options.map((option, index) => (
     {option.text}
   </option>
 ));
+
 
 const verbs = [
   {
@@ -184,7 +188,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
   }
 
   componentWillUpdate(nextProps) {
-    const { currentAgent } = nextProps;
+    const {currentAgent} = nextProps;
     if (currentAgent !== this.props.currentAgent) {
       this.props.onChangeIntentData('agent', `${currentAgent.id}~${currentAgent.agentName}`); // TODO: Remove this format and pass the entire object
     }
@@ -192,10 +196,14 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
 
   onChangeInput(evt, field) {
     let value;
-    if (evt) {
+    //console.log(evt,field);
+    if (evt && evt.target) {
       value = evt.target.type === 'checkbox' ? evt.target.checked : evt.target.value;
     } else {
       value = null;
+    }
+    if (field === 'followUpIntents'){
+      value = evt;
     }
     if (field === 'examples' || field === 'responses') {
       if (evt.keyCode === 13 && !_.isEmpty(value)) { // If user hits enter add response
@@ -240,12 +248,12 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
 
   componentDidUpdate(prevProps, prevState, prevContext) {
     //If an example is added or removed then update the table to add/remove the new example
-    if (!_.isEqual(prevProps.scenarioData.slots,this.props.scenarioData.slots) || !_.isEqual(prevProps.intent.examples,this.props.intent.examples)){
+    if (!_.isEqual(prevProps.scenarioData.slots, this.props.scenarioData.slots) || !_.isEqual(prevProps.intent.examples, this.props.intent.examples)) {
       this.setState({findNewSysEntities: true});
       this.props.onFindSysEntities(this.props.currentAgent.id);
     }
-    
-    if (prevProps.intent.examples.length !== this.props.intent.examples.length ) {
+
+    if (prevProps.intent.examples.length !== this.props.intent.examples.length) {
       this.setState({findNewSysEntities: true});
       this.props.onFindSysEntities(this.props.currentAgent.id);
       if (prevProps.intent.examples.length < this.props.intent.examples.length) {
@@ -337,12 +345,12 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
 
   setEditMode(isEditMode) {
     if (isEditMode) {
-      this.setState({ editMode: true });
+      this.setState({editMode: true});
       this.props.onEditMode(this.props);
     } else {
       this.props.resetForm();
-      this.setState({ editMode: false });
-      const { currentAgent } = this.props;
+      this.setState({editMode: false});
+      const {currentAgent} = this.props;
       if (currentAgent) {
         this.props.onChangeIntentData('agent', `${currentAgent.id}~${currentAgent.agentName}`); // TODO: Remove this format and pass the entire object
       }
@@ -357,7 +365,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
 
       return !slot.entity;
     });
-    if (invalidSlotEntities.indexOf(true) > -1){
+    if (invalidSlotEntities.indexOf(true) > -1) {
       Alert.warning(messages.checkEntitiesOfSlots.defaultMessage, {
         position: 'bottom'
       });
@@ -394,7 +402,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
 
   generateSlotObject(data, slotName) {
     return {
-      slotName: slotName ? slotName: data.entity,
+      slotName: slotName ? slotName : data.entity,
       entity: data.entity,
       isRequired: false,
       isList: false,
@@ -408,13 +416,13 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
       entityTagged: true
     });
     this.props.onTagEntity(userSays, entity, entityName);
-    this.props.onAddSlot(this.generateSlotObject({ entity: entity.entityName }));
+    this.props.onAddSlot(this.generateSlotObject({entity: entity.entityName}));
   }
 
   handleOnAddSlot() {
     const currentNewSlotCount = this.state.countOfNewSlots;
     const slotName = `${messages.defaultNewSlotName.defaultMessage} ${currentNewSlotCount === 0 ? '' : currentNewSlotCount}`;
-    this.props.onAddSlot(this.generateSlotObject({ entity: null }, slotName));
+    this.props.onAddSlot(this.generateSlotObject({entity: null}, slotName));
     this.setState({
       countOfNewSlots: currentNewSlotCount + 1
     })
@@ -443,7 +451,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
   }
 
   render() {
-    const { loading, error, success, intent, webhook, agentDomains, agentEntities, currentAgent, postFormat } = this.props;
+    const {loading, error, success, intent, webhook, agentDomains, agentEntities, currentAgent, postFormat} = this.props;
     if (_.isNil(agentDomains) && _.isNil(agentEntities)) return undefined;
     const intentProps = {
       loading,
@@ -451,10 +459,24 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
       success,
       intent,
     };
+    const customStyles = {
+      // multipleValue: (base, state) => {
+      //   return { ...base, color: state.isFocused ? 'blue' : 'red' };
+      // },
+      // container: (base,state) => {
+      //   console.log(base);
+      //   console.log(state);
+      //   return {...base,  width: '50%', float: state.isSelected?'right':'left'}
+      // }
+    }
 
     let domainsSelect = [];
     if (agentDomains !== false) {
-      const defaultOption = { value: 'default', text: 'Please choose a domain to place your intent', disabled: 'disabled' };
+      const defaultOption = {
+        value: 'default',
+        text: 'Please choose a domain to place your intent',
+        disabled: 'disabled'
+      };
       const options = agentDomains.domains.map((domain) => ({
         value: domain.domainName,
         text: domain.domainName,
@@ -462,40 +484,57 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
       domainsSelect = [defaultOption, ...options];
     }
 
+    const intentFollowupOptions = [];
+    this.props.domainIntents.intents.map((intent) => {
+      intentFollowupOptions.push({value: intent.intentName, label: intent.intentName});
+    });
+
     let breadcrumbs = [];
     if (currentAgent) {
       breadcrumbs = [
-        { label: 'Agent' },
-        { link: `/agent/${currentAgent.id}`, label: `${currentAgent.agentName}` },
-        { link: `/intents`, label: 'Intents' },
-        { label: this.state.editMode ? 'Edit' : '+ Create' }
+        {label: 'Agent'},
+        {link: `/agent/${currentAgent.id}`, label: `${currentAgent.agentName}`},
+        {link: `/intents`, label: 'Intents'},
+        {label: this.state.editMode ? 'Edit' : '+ Create'}
       ];
     }
     else {
-      breadcrumbs = [{ label: '+ Creating intents' },];
+      breadcrumbs = [{label: '+ Creating intents'},];
     }
 
     return (
 
       <div>
-        <Col style={{ zIndex: 2, position: 'fixed', top: '50%', left: '45%' }} s={12}>
-          {intentProps.loading ? <Preloader color='#00ca9f' size='big' /> : null}
+        <Col style={{zIndex: 2, position: 'fixed', top: '50%', left: '45%'}} s={12}>
+          {intentProps.loading ? <Preloader color='#00ca9f' size='big'/> : null}
         </Col>
         <Helmet
           title={this.state.editMode ? "Edit Intent" : "Create Intent"}
           meta={[
-            { name: 'description', content: this.state.editMode ? 'Edit intent' : 'Create an intent' },
+            {name: 'description', content: this.state.editMode ? 'Edit intent' : 'Create an intent'},
           ]}
         />
         <Header
           breadcrumbs={breadcrumbs} actionButtons={
-            <ActionButton label={this.state.editMode ? messages.editButton : messages.createButton} onClick={this.submitForm} />
-          }
+          <ActionButton label={this.state.editMode ? messages.editButton : messages.createButton}
+                        onClick={this.submitForm}/>
+        }
         />
         <Content>
-          <ContentHeader title={this.state.editMode ? messages.editIntentTitle : messages.createIntentTitle} subTitle={this.state.editMode ? messages.editIntentDescription : messages.createIntentDescription} />
+          <ContentHeader title={this.state.editMode ? messages.editIntentTitle : messages.createIntentTitle}
+                         subTitle={this.state.editMode ? messages.editIntentDescription : messages.createIntentDescription}/>
+
           <Form>
+            {/*<Row style={{ marginTop: '15px', float: 'left', clear: 'both' }} >*/}
+
+            {/*</Row>*/}
             <Row>
+              <Toggle
+                label={messages.isBlockingIntent.defaultMessage}
+                right
+                onChange={(evt) => this.onChangeInput(evt, 'isBlockingIntent')}
+                checked={this.props.scenarioData.isBlockingIntent}
+              />
               <Input
                 s={12}
                 type="select"
@@ -531,11 +570,11 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
             </Row>
           </Form>
 
-            <div>
-              {
-                this.state.userExamplesShown.length > 0 ?
+          <div>
+            {
+              this.state.userExamplesShown.length > 0 ?
 
-                <TableContainer id="userSayingsTable" quotes tableStyle={{ marginBottom: '0px'}}>
+                <TableContainer id="userSayingsTable" quotes tableStyle={{marginBottom: '0px'}}>
                   <Table>
                     <UserSayings
                       page={this.state.userExamplesPage}
@@ -549,54 +588,55 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                     />
                   </Table>
                 </TableContainer> :
-                <TableContainer id="userSayingsTable" quotes tableStyle={{ marginBottom: '0px'}} style={{ backgroundColor: '#c5cbd8' }} >
+                <TableContainer id="userSayingsTable" quotes tableStyle={{marginBottom: '0px'}}
+                                style={{backgroundColor: '#c5cbd8'}}>
                   <Table>
                     <tbody>
-                      <tr style={{ width: '100%' }}>
-                        <td style={{ width: '100%', display: 'inline-block' }}>
-                          <div>
-                            <span>{messages.userSaysExample.defaultMessage}</span>
-                          </div>
-                        </td>
-                      </tr>
+                    <tr style={{width: '100%'}}>
+                      <td style={{width: '100%', display: 'inline-block'}}>
+                        <div>
+                          <span>{messages.userSaysExample.defaultMessage}</span>
+                        </div>
+                      </td>
+                    </tr>
                     </tbody>
                   </Table>
                 </TableContainer>
-              }
-              {
-                this.state.showUserExamplesPagination ?
-                  <Row>
-                    <Pagination
-                      pageText='Page'
-                      page={this.state.userExamplesPage}
-                      pages={this.state.userExamplesPages}
-                      canPrevious={this.state.userExamplesPage !== 0}
-                      canNext={this.state.userExamplesPage <= this.state.userExamplesPages}
-                      previousText='Previous'
-                      nextText='Next'
-                      ofText='of'
-                      style={{
-                        borderTop: '0px'
-                      }}
-                      showPageJump={true}
-                      onPageChange={(pageIndex) => {
-                        this.setState({
-                          userExamplesPage: pageIndex,
-                          userExamplesShown: this.state.userExampleFilter.length > 0 ? intent.examples.filter((example) => {
+            }
+            {
+              this.state.showUserExamplesPagination ?
+                <Row>
+                  <Pagination
+                    pageText='Page'
+                    page={this.state.userExamplesPage}
+                    pages={this.state.userExamplesPages}
+                    canPrevious={this.state.userExamplesPage !== 0}
+                    canNext={this.state.userExamplesPage <= this.state.userExamplesPages}
+                    previousText='Previous'
+                    nextText='Next'
+                    ofText='of'
+                    style={{
+                      borderTop: '0px'
+                    }}
+                    showPageJump={true}
+                    onPageChange={(pageIndex) => {
+                      this.setState({
+                        userExamplesPage: pageIndex,
+                        userExamplesShown: this.state.userExampleFilter.length > 0 ? intent.examples.filter((example) => {
                             return example.userSays.toLowerCase().indexOf(this.state.userExampleFilter.toLowerCase()) > -1;
                           }).slice(pageIndex * this.props.defaultUserExamplesPageSize, pageIndex * this.props.defaultUserExamplesPageSize + this.props.defaultUserExamplesPageSize) :
-                            intent.examples.slice(pageIndex * this.props.defaultUserExamplesPageSize, pageIndex * this.props.defaultUserExamplesPageSize + this.props.defaultUserExamplesPageSize)
-                        });
-                      }}
-                    />
-                  </Row>
-                  : null
-              }
-            </div>
+                          intent.examples.slice(pageIndex * this.props.defaultUserExamplesPageSize, pageIndex * this.props.defaultUserExamplesPageSize + this.props.defaultUserExamplesPageSize)
+                      });
+                    }}
+                  />
+                </Row>
+                : null
+            }
+          </div>
 
-          <Form style={{ marginTop: '20px' }}>
+          <Form style={{marginTop: '20px'}}>
             <Row>
-              <InputLabel text={messages.slots} />
+              <InputLabel text={messages.slots}/>
             </Row>
           </Form>
 
@@ -632,17 +672,19 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                   {
                     width: '5%',
                     icon: (
-                            <Tooltip
-                              onClick={() => { this.setState({enableSlotOrder: !this.state.enableSlotOrder }) }}
-                              tooltip={'Sort slots'}
-                              delay={0}
-                              position="top"
-                            >
-                              <a>
-                                <img src={this.state.enableSlotOrder ? iconOrganize : iconOrganizeOutline} alt="" />
-                              </a>
-                            </Tooltip>
-                          )
+                      <Tooltip
+                        onClick={() => {
+                          this.setState({enableSlotOrder: !this.state.enableSlotOrder})
+                        }}
+                        tooltip={'Sort slots'}
+                        delay={0}
+                        position="top"
+                      >
+                        <a>
+                          <img src={this.state.enableSlotOrder ? iconOrganize : iconOrganizeOutline} alt=""/>
+                        </a>
+                      </Tooltip>
+                    )
                   },
                 ]}
               />
@@ -689,42 +731,42 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                 />
               </Table>
             </TableContainer> :
-            <TableContainer id="intentResponsesTable" style={{ backgroundColor: '#c5cbd8' }} quotes>
-              <Table>            
+            <TableContainer id="intentResponsesTable" style={{backgroundColor: '#c5cbd8'}} quotes>
+              <Table>
                 <tbody>
-                  <tr style={{ width: '100%' }}>
-                    <td style={{ width: '100%', display: 'inline-block' }}>
-                      <div>
-                        <span>{messages.agentResponseExample.defaultMessage}</span>
-                      </div>
-                    </td>
-                  </tr>
+                <tr style={{width: '100%'}}>
+                  <td style={{width: '100%', display: 'inline-block'}}>
+                    <div>
+                      <span>{messages.agentResponseExample.defaultMessage}</span>
+                    </div>
+                  </td>
+                </tr>
                 </tbody>
               </Table>
             </TableContainer>
           }
           <div
-            style={{ float: 'left', clear: 'both' }}
+            style={{float: 'left', clear: 'both'}}
             ref={(el) => {
               this.lastAgentResponse = el;
             }}
           >
           </div>
           <Form>
-          <Row style={{ marginTop: '15px', float: 'left', clear: 'both' }} >
-            <Toggle
-              label={messages.useWebhook.defaultMessage}
-              right
-              onChange={(evt) => this.onChangeInput(evt, 'useWebhook')}
-              checked={intent.useWebhook}
-            />
-          </Row>
+            <Row style={{marginTop: '15px', float: 'left', clear: 'both'}}>
+              <Toggle
+                label={messages.useWebhook.defaultMessage}
+                right
+                onChange={(evt) => this.onChangeInput(evt, 'useWebhook')}
+                checked={intent.useWebhook}
+              />
+            </Row>
           </Form>
 
 
           {
             intent.useWebhook ?
-              <Form style={{ marginTop: '70px' }}>
+              <Form style={{marginTop: '70px'}}>
                 <Row>
                   <Input
                     s={2}
@@ -774,25 +816,26 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                         useWorker: false,
                         showLineNumbers: true,
                         tabSize: 2,
-                      }} />) : null}
+                      }}/>) : null}
                 </Row>
               </Form>
               : null
           }
 
 
-
-          <Row style={{ marginTop: '15px', float: 'left', clear: 'both' }} >
-            <Toggle
-              label={messages.usePostFormat.defaultMessage}
-              right
-              onChange={(evt) => this.onChangeInput(evt, 'usePostFormat')}
-              checked={intent.usePostFormat}
-            />
-          </Row>
+          <Form>
+            <Row style={{marginTop: '15px', float: 'left', clear: 'both'}}>
+              <Toggle
+                label={messages.usePostFormat.defaultMessage}
+                right
+                onChange={(evt) => this.onChangeInput(evt, 'usePostFormat')}
+                checked={intent.usePostFormat}
+              />
+            </Row>
+          </Form>
           {
             intent.usePostFormat ?
-              <Form style={{ marginTop: '100px' }}>
+              <Form style={{marginTop: '100px'}}>
                 <Row>
                   <AceEditor
                     width="100%"
@@ -812,14 +855,22 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                       useWorker: false,
                       showLineNumbers: true,
                       tabSize: 2,
-                    }} />
+                    }}/>
                 </Row>
               </Form> : null
 
           }
-
-
-
+          <Row style={{ paddingTop: '25px', clear: 'both' }}>
+            <Select
+              value={this.props.selectedFollowUpIntents}
+              onChange={(evt) => this.onChangeInput(evt, 'followUpIntents')}
+              options={intentFollowupOptions}
+              isMulti={true}
+              isSearchable={true}
+              placeholder={messages.followUpIntents.defaultMessage}
+              styles={customStyles}
+            />
+          </Row>
         </Content>
         <ConfirmationModal
           isOpen={this.state.displayModal}
@@ -830,6 +881,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
       </div>
     );
   }
+
 }
 
 IntentPage.propTypes = {
@@ -878,6 +930,10 @@ IntentPage.propTypes = {
   setWindowSelection: React.PropTypes.func,
   onEditMode: React.PropTypes.func,
   onChangeAgentOfSlot: React.PropTypes.func,
+  domainIntents: React.PropTypes.oneOfType([
+    React.PropTypes.object,
+    React.PropTypes.bool,
+  ])
 };
 
 IntentPage.defaultProps = {
@@ -892,27 +948,28 @@ export function mapDispatchToProps(dispatch) {
         dispatch(loadAgentDomains(value));
         dispatch(loadAgentEntities(value, null, null, true));
       }
-      dispatch(changeIntentData({ value, field }));
+      //console.log(value,field)
+      dispatch(changeIntentData({value, field}));
     },
     onChangeWebhookData: (field, evt) => {
       dispatch(resetStatusFlags());
       if (field === 'webhookPayload') {
         const value = evt;
-        dispatch(changeWebhookData({ value, field }));
+        dispatch(changeWebhookData({value, field}));
       }
       else {
-        dispatch(changeWebhookData({ value: evt.target.value, field }));
+        dispatch(changeWebhookData({value: evt.target.value, field}));
       }
     },
     onChangePostFormatData: (field, evt) => {
       dispatch(resetStatusFlags());
       if (field === 'postFormatPayloadDefault') {
         let field = 'postFormatPayload'
-        dispatch(changePostFormatData({ value: messages.defaultPostFormat.defaultMessage, field }))
+        dispatch(changePostFormatData({value: messages.defaultPostFormat.defaultMessage, field}))
       }
       if (field === 'postFormatPayload') {
         const value = evt;
-        dispatch(changePostFormatData({ value, field }));
+        dispatch(changePostFormatData({value, field}));
       }
     },
     onRemoveExample: (exampleIndex, evt) => {
@@ -927,35 +984,35 @@ export function mapDispatchToProps(dispatch) {
     onAddSlot: (slot) => {
       dispatch(addSlot(slot));
     },
-    onFindSysEntities: (agentId) =>{
+    onFindSysEntities: (agentId) => {
       dispatch(findSysEntities(agentId))
     },
     onTagEntity: (userSays, entity) => {
       dispatch(dispatch(resetStatusFlags()));
-      dispatch(tagEntity({ userSays, entity }));
+      dispatch(tagEntity({userSays, entity}));
     },
     onCheckboxChange: (slotName, field, evt) => {
       dispatch(dispatch(resetStatusFlags()));
-      dispatch(toggleFlag({ slotName, field, value: evt.target.checked }));
+      dispatch(toggleFlag({slotName, field, value: evt.target.checked}));
     },
     onSlotNameChange: (slotName, evt) => {
       dispatch(dispatch(resetStatusFlags()));
-      dispatch(changeSlotName({ slotName, value: evt.target.value }));
+      dispatch(changeSlotName({slotName, value: evt.target.value}));
     },
     onChangeAgentOfSlot: (slotName, entityName) => {
       dispatch(dispatch(resetStatusFlags()));
-      dispatch(changeSlotAgent({ slotName, entityName }));
+      dispatch(changeSlotAgent({slotName, entityName}));
     },
     onAddTextPrompt: (slotName, evt) => {
       dispatch(dispatch(resetStatusFlags()));
       if (evt.keyCode === 13) {
-        dispatch(addTextPrompt({ slotName, value: evt.target.value }));
+        dispatch(addTextPrompt({slotName, value: evt.target.value}));
         evt.target.value = null;
       }
     },
     onDeleteTextPrompt: (slotName, textPrompt, evt) => {
       dispatch(dispatch(resetStatusFlags()));
-      dispatch(deleteTextPrompt({ slotName, textPrompt }));
+      dispatch(deleteTextPrompt({slotName, textPrompt}));
     },
     onAutoCompleteEntityFunction: (entityName, evt) => {
       dispatch(dispatch(resetStatusFlags()));
@@ -1016,7 +1073,9 @@ const mapStateToProps = createStructuredSelector({
   agentDomains: makeSelectAgentDomains(),
   agentEntities: makeSelectAgentEntities(),
   currentAgent: makeSelectCurrentAgent(),
-  postFormat: makeSelectPostFormatData()
+  postFormat: makeSelectPostFormatData(),
+  domainIntents: makeSelectDomainIntents(),
+  selectedFollowUpIntents: makeSelectSelectedFollowUpIntents()
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(IntentPage);

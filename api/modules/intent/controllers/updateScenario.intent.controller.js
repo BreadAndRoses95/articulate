@@ -13,6 +13,9 @@ const updateDataFunction = (redis, intentId, currentScenario, updateData, cb) =>
     if (updateData.intentResponses){
         currentScenario.intentResponses = updateData.intentResponses;
     }
+    if (updateData.followUpIntents){
+        currentScenario.followUpIntents = updateData.followUpIntents;
+    }
     const flatScenario = Flat(currentScenario);
     const flatUpdateData = Flat(updateData);
     Object.keys(flatUpdateData).forEach( (key) => {

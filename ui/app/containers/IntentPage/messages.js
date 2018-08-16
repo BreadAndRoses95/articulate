@@ -9,7 +9,10 @@ export default defineMessages({
     id: 'containers.IntentPage.create_intent.defaultPostFormat',
     defaultMessage: '{ "textResponse" : "{{ textResponse }}" }'
   },
-
+  isBlockingIntent: {
+    id: 'containters.intentPage.create_intent.isBlockingIntent',
+    defaultMessage: 'Make intent blocking'
+  },
   createIntentDescription: {
     id: 'containers.IntentPage.create_intent.description',
     defaultMessage: 'Intents are grouped user sayings with a similar purpose. For example a user may say, ' +
@@ -30,6 +33,10 @@ export default defineMessages({
   domain: {
     id: 'containers.IntentPage.create_intent.domain',
     defaultMessage: 'Domain',
+  },
+  followUpIntents: {
+    id: 'containers.IntentPage.create_intent.followUpIntents',
+    defaultMessage: 'Follow up intents'
   },
   intentName: {
     id: 'containers.IntentPage.create_intent.intentName',

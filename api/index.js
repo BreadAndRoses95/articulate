@@ -13,7 +13,6 @@ const StartDB = require('./helpers/startDB');
 module.exports = (callback) => init(callback);
 
 const init = (callback) => {
-    console.log("ahhh")
 
     return Async.series({ redis: initRedis, server: initHapi },
         (err, results) => {

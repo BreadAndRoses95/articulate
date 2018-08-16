@@ -87,6 +87,14 @@ module.exports = (object, type) => {
                     object.intentResponses = [];
                 }
             }
+            if (typeof object.isBlockingIntent !== 'boolean '){
+                object.isBlockingIntent = object.isBlockingIntent === 'true'
+            }
+            if (object.followUpIntents === ''){
+                if (object.followUpIntents.length === 0) {
+                    object.followUpIntents = [];
+                }
+            }
             break;
         case 'webhook':
             break;

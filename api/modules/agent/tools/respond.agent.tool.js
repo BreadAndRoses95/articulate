@@ -264,7 +264,7 @@ module.exports = (server, conversationStateObject,  callback, followUpIntent = f
         isActionIncomplete = findIsActionIncomplete(conversationStateObject);
 
         // If last action was complete : we just moved from one intent to the same/another
-        if ((!conversationStateObject.currentContext) || ( !isActionIncomplete)) {
+        if ((!conversationStateObject.currentContext ||  !isActionIncomplete) || (conversationStateObject.lastIntent !== null && !conversationStateObject.lastIntent.scenario.isBlockingIntent)) {
                 conversationStateObject.intent = getIntentData(conversationStateObject);
         }
         else {
