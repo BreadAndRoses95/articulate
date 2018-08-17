@@ -29,3 +29,6 @@ export const LOAD_WEBHOOK = 'IntentPage/LOAD_WEBHOOK';
 export const LOAD_WEBHOOK_SUCCESS = 'IntentPage/LOAD_WEBHOOK_SUCCESS';
 export const LOAD_WEBHOOK_ERROR = 'IntentPage/LOAD_WEBHOOK_ERROR';
 export const SORT_SLOTS = 'IntentPage/SORT_SLOTS';
+export const RESET_INTENT_DATA_FROM_PARENT = 'IntentPage/RESET_INTENT_DATA_FROM_PARENT';
+export const SET_PARENT_INTENT = 'IntentPage/SET_PARENT_INTENT'
+export const SET_PARENT_SCENARIO = 'IntentPage/SET_PARENT_SCENARIO'

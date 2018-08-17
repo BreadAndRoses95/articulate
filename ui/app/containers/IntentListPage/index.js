@@ -26,6 +26,10 @@ import {
   resetDomainIntents,
 } from '../../containers/App/actions';
 import {
+  setParentIntent
+} from '../IntentPage/actions'
+
+import {
   makeSelectAgentDomains,
   makeSelectCurrentAgent,
   makeSelectDomain,
@@ -148,6 +152,10 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
     ));
   }
 
+  onAddFollowUpIntent(intent) {
+    this.props.onAddFollowUpIntent(intent);
+  }
+
   renderMenu() {
     return [{
       label: 'Edit',
@@ -155,7 +163,9 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
     }, {
       label: 'Delete',
       action: (intent) => this.onDeletePrompt(intent),
-    }];
+    },
+      {label: 'Add follow up intent',
+      action: (intent) => this.onAddFollowUpIntent(intent)}];
   }
 
   render() {
@@ -262,6 +272,7 @@ IntentListPage.propTypes = {
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
+  onAddFollowUpIntent: React.PropTypes.func
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -288,6 +299,11 @@ export function mapDispatchToProps(dispatch) {
         return dispatch(loadDomainIntents(domainId, page, filter));
       }
       dispatch(loadAgentIntents(agentId, page, filter));
+    },
+    onAddFollowUpIntent: (intent) => {
+      dispatch(push("/intents/create"));
+      dispatch(setParentIntent(intent));
+      //return dispatch(addFollowUpIntent(intent));
     }
   };
 }

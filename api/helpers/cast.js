@@ -6,16 +6,16 @@ module.exports = (object, type) => {
     switch (type) {
 
         case 'agent':
-            if (typeof object.useWebhook !== 'boolean'){
+            if (typeof object.useWebhook !== 'boolean') {
                 object.useWebhook = object.useWebhook === 'true';
             }
-            if (typeof object.usePostFormat !== 'boolean'){
+            if (typeof object.usePostFormat !== 'boolean') {
                 object.usePostFormat = object.usePostFormat === 'true';
             }
-            if (typeof object.extraTrainingData !== 'boolean'){
+            if (typeof object.extraTrainingData !== 'boolean') {
                 object.extraTrainingData = object.extraTrainingData === 'true';
             }
-            if (typeof object.enableModelsPerDomain !== 'boolean'){
+            if (typeof object.enableModelsPerDomain !== 'boolean') {
                 object.enableModelsPerDomain = object.enableModelsPerDomain === 'true';
             }
             object.domainClassifierThreshold = parseFloat(object.domainClassifierThreshold);
@@ -23,25 +23,25 @@ module.exports = (object, type) => {
         case 'context':
             break;
         case 'domain':
-            if (typeof object.enabled !== 'boolean'){
+            if (typeof object.enabled !== 'boolean') {
                 object.enabled = object.enabled === 'true';
             }
-            if (typeof object.extraTrainingData !== 'boolean'){
+            if (typeof object.extraTrainingData !== 'boolean') {
                 object.extraTrainingData = object.extraTrainingData === 'true';
             }
             object.intentThreshold = parseFloat(object.intentThreshold);
             break;
         case 'entity':
-            if (object.regex === '' || !object.regex || object.regex === 'null'){
+            if (object.regex === '' || !object.regex || object.regex === 'null') {
                 object.regex = null;
             }
             break;
         case 'intent':
-            if (typeof object.useWebhook !== 'boolean'){
+            if (typeof object.useWebhook !== 'boolean') {
                 object.useWebhook = object.useWebhook === 'true';
             }
 
-            if (typeof object.usePostFormat !== 'boolean'){
+            if (typeof object.usePostFormat !== 'boolean') {
                 object.usePostFormat = object.usePostFormat === 'true';
             }
             object.examples = object.examples.map((example) => {
@@ -73,10 +73,10 @@ module.exports = (object, type) => {
                     if (!_.isArray(slot.textPrompts)) {
                         slot.textPrompts = [];
                     }
-                    if (typeof object.isList !== 'boolean'){
+                    if (typeof object.isList !== 'boolean') {
                         slot.isList = slot.isList === 'true';
                     }
-                    if (typeof object.isRequired !== 'boolean'){
+                    if (typeof object.isRequired !== 'boolean') {
                         slot.isRequired = slot.isRequired === 'true';
                     }
                     return slot;
@@ -87,14 +87,23 @@ module.exports = (object, type) => {
                     object.intentResponses = [];
                 }
             }
-            if (typeof object.isBlockingIntent !== 'boolean '){
+            if (object.parentIntent) {
+                object.parentIntent = parseInt(object.parentIntent)
+            }
+            if (typeof object.isBlockingIntent !== 'boolean ') {
                 object.isBlockingIntent = object.isBlockingIntent === 'true'
             }
-            if (object.followUpIntents === ''){
+            if (object.followUpIntents === '') {
                 if (object.followUpIntents.length === 0) {
                     object.followUpIntents = [];
                 }
             }
+            else {
+                object.followUpIntents = object.followUpIntents.map((followUpIntent) => {
+                    return parseInt(followUpIntent);
+                })
+            }
+
             break;
         case 'webhook':
             break;
@@ -109,19 +118,19 @@ module.exports = (object, type) => {
             object = newObject;
             break;
         case 'document':
-            if (object.result && object.result.results){
+            if (object.result && object.result.results) {
                 object.result.results.forEach((result) => {
 
-                    if (result.intent){
-                        if (result.intent.name && (result.intent.name === '' || result.intent.name === 'null')){
+                    if (result.intent) {
+                        if (result.intent.name && (result.intent.name === '' || result.intent.name === 'null')) {
                             result.intent.name = null;
                         }
                     }
-                    if (result.entities !== undefined && result.entities !== null){
-                        if (Array.isArray(result.entities)){
+                    if (result.entities !== undefined && result.entities !== null) {
+                        if (Array.isArray(result.entities)) {
                             result.entities.forEach((entity) => {
 
-                                if (entity.confidence === ''){
+                                if (entity.confidence === '') {
                                     entity.confidence = null;
                                 }
                             });

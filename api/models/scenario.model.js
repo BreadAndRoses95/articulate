@@ -13,8 +13,9 @@ class ScenarioModel {
             scenarioName: Joi.string().trim(),
             slots: Joi.array().items(SlotModel.schema),
             intentResponses: Joi.array().items(Joi.string().trim()),
-            followUpIntents : Joi.array().items(Joi.string().trim()),
-            isBlockingIntent : Joi.boolean()
+            followUpIntents : Joi.array().items(Joi.number().integer().min(0)),
+            isBlockingIntent : Joi.boolean(),
+            parentIntent: Joi.number().integer()
         };
     };
 }

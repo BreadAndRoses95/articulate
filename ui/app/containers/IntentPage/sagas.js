@@ -44,7 +44,8 @@ import {
   loadPostFormat,
   loadPostFormatError,
   loadPostFormatSuccess,
-  loadSysEntitiesSucess
+  loadSysEntitiesSucess,
+  resetIntentDataFromParent
 } from './actions';
 import {
   LOAD_INTENT,
@@ -52,7 +53,8 @@ import {
   LOAD_WEBHOOK,
   LOAD_POSTFORMAT,
   LOAD_INTENT_SUCCESS,
-  FIND_SYS_ENTITES
+  FIND_SYS_ENTITES,
+  SET_PARENT_INTENT
 } from './constants';
 import {
   makeSelectIntentData,
@@ -61,8 +63,9 @@ import {
   makeSelectOldScenarioData,
   makeSelectWebhookData,
   makeSelectOldWebhookData,
-  makeSelectPostFormatData,
+  makeSelectPostFormatData, makeSelectParentScenario, makeSelectParentIntent,
 } from './selectors';
+
 import { SIGSYS } from 'constants';
 
 function* postWebhook(payload) {
@@ -123,23 +126,33 @@ function* postScenario(payload) {
 export function* postIntent(payload) {
   const { api } = payload;
   let intentData = yield select(makeSelectIntentData());
+  let parentScenario = yield select(makeSelectParentScenario());
+  let parentIntent = yield select(makeSelectParentIntent());
   intentData = Immutable.asMutable(intentData, { deep: true });
-
+  parentScenario = Immutable.asMutable(parentScenario, {deep : true});
   try {
     const response = yield call(api.intent.postIntent, { body: intentData });
-    const intent = response.obj;
-    yield put(intentCreated(intent, intent.id));
-    yield call(postScenario, { api, id: intent.id });
+    const newIntent = response.obj;
+    yield put(intentCreated(newIntent, newIntent.id));
+    yield call(postScenario, { api, id: newIntent.id });
+    const {agent,domain,intent, ...data} = parentScenario;
+    delete data.id;
+    if (!parentScenario.followUpIntents){
+      parentScenario.followUpIntents = []
+    }
+    parentScenario.followUpIntents.push(newIntent.id);
+    yield call(api.intent.putIntentIdScenario, { id:parentIntent.id, body: data })
     if (intent.useWebhook) {
-      yield call(postWebhook, { api, id: intent.id });
+      yield call(postWebhook, { api, id: newIntent.id });
     }
     if (intent.usePostFormat) {
-      yield call(postPostFormat, { api, id: intent.id, intentData });
+      yield call(postPostFormat, { api, id: newIntent.id, intentData });
     }
     yield put(push('/intents'));
   } catch ({ response }) {
     yield put(intentCreationError({ message: response.obj.message }));
   }
+
 }
 
 export function* createIntent() {
@@ -173,6 +186,25 @@ export function* loadAgentEntities() {
   yield take(LOCATION_CHANGE);
   yield cancel(watcher);
 }
+
+// export function* loadIntentSuccessUpdateOptions() {
+//   const watcher = yield takeLatest(LOAD_INTENT_SUCCESS, updateSelectorFollowupIntents);
+//
+//   yield take(LOCATION_CHANGE);
+//   yield cancel(watcher);
+// }
+//
+// function* updateSelectorFollowupIntents(payload){
+//   console.log(payload)
+//   const intentFollowupOptions = [];
+//   const domainIntents = yield select(makeSelectDomainIntents());
+//   domainIntents.intents.map((intent) => {
+//     if (intent.intentName !==payload.intent.intentName) {
+//       intentFollowupOptions.push({value: intent.intentName, label: intent.intentName});
+//     }
+//   });
+//   yield put(loadOptionsFollowupSelectSuccess({intentFollowupOptions}));
+// }
 
 function* putWebhook(payload) {
   const { api, id } = payload;
@@ -441,6 +473,17 @@ export function* loadPostFormatSaga() {
 
 export function* findSysEntitiesSaga() {
   const watcher = yield takeLatest(FIND_SYS_ENTITES, getSysEntities);
+}
+
+export function* getParentSlotsScenario(payload) {
+  const {api, parentIntent} = payload;
+  const response = yield call(api.intent.getIntentIdScenario,{id:parentIntent.id});
+  yield put(resetIntentDataFromParent(parentIntent,response.body));
+
+}
+
+export function* setParentIntentSage() {
+  const watcher = yield takeLatest(SET_PARENT_INTENT,getParentSlotsScenario);
 
 }
 // Bootstrap sagas
@@ -455,4 +498,5 @@ export default [
   loadWebhook,
   loadPostFormatSaga,
   findSysEntitiesSaga,
+  setParentIntentSage
 ];

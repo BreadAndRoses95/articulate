@@ -88,7 +88,7 @@ import {
   LOAD_SETTINGS_SUCCESS,
   CHANGE_SETTINGS_DATA,
   RESET_SETTINGS_DATA,
-  REMOVE_SETTINGS_FALLBACK
+  REMOVE_SETTINGS_FALLBACK,
 } from './constants';
 
 // The initial state of the App
@@ -122,7 +122,7 @@ const initialState = Immutable({
     intentClassifierPipeline: [],
     entityClassifierPipeline: [],
     defaultAgentFallbackResponses: []
-  },
+  }
 });
 
 function appReducer(state = initialState, action) {

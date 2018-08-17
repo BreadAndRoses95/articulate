@@ -145,5 +145,5 @@ export default [
   loadDomainIntents,
   deleteIntent,
   loadAgentDomains,
-  loadAgentIntents,
+  loadAgentIntents
 ];

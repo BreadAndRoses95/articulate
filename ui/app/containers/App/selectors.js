@@ -33,6 +33,7 @@ const makeSelectCurrentAgent = () => createSelector(
   (globalState) => globalState.currentAgent,
 );
 
+
 const makeSelectCurrentAgentStatus = () => createSelector(
   selectGlobal,
   (globalState) => globalState.currentAgentStatus

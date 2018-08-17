@@ -77,6 +77,7 @@ export function* loadCurrentAgent() {
   yield take(LOCATION_CHANGE);
 }
 
+
 export function* getCurrentAgentStatus(payload) {
   const { api, id } = payload;
   try {
@@ -165,10 +166,11 @@ export function* loadSettings() {
 }
 
 
+
 export default [
   loadAgents,
   loadCurrentAgent,
   loadCurrentAgentStatus,
   trainAgent,
-  loadSettings,
+  loadSettings
 ];

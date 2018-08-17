@@ -47,7 +47,7 @@ import {
   makeSelectError,
   makeSelectLoading,
   makeSelectSuccess,
-  makeSelectDomainIntents
+  makeSelectDomainIntents,
 } from '../App/selectors';
 import {
   addSlot,
@@ -70,7 +70,7 @@ import {
   loadPostFormat,
   sortSlots,
   changeSlotAgent,
-  findSysEntities
+  findSysEntities,
 } from './actions';
 import AvailableSlots from './Components/AvailableSlots';
 import Responses from './Components/Responses';
@@ -90,7 +90,8 @@ import {
   makeSelectWebhookData,
   makeSelectOldIntentData,
   makeSelectPostFormatData,
-  makeSelectSelectedFollowUpIntents
+  makeSelectSelectedFollowUpIntents,
+  makeSelectParentIntent
 } from './selectors';
 
 const returnFormattedOptions = (options) => options.map((option, index) => (
@@ -172,7 +173,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
     webhookJustOpen: false,
     webhookPayloadJustOpen: false,
     enableSlotOrder: false,
-    countOfNewSlots: 0,
+    countOfNewSlots: 0
   };
 
   componentWillMount() {
@@ -202,7 +203,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
     } else {
       value = null;
     }
-    if (field === 'followUpIntents'){
+    if (field === 'followUpIntents') {
       value = evt;
     }
     if (field === 'examples' || field === 'responses') {
@@ -247,7 +248,6 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
   }
 
   componentDidUpdate(prevProps, prevState, prevContext) {
-    //If an example is added or removed then update the table to add/remove the new example
     if (!_.isEqual(prevProps.scenarioData.slots, this.props.scenarioData.slots) || !_.isEqual(prevProps.intent.examples, this.props.intent.examples)) {
       this.setState({findNewSysEntities: true});
       this.props.onFindSysEntities(this.props.currentAgent.id);
@@ -860,11 +860,11 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
               </Form> : null
 
           }
-          <Row style={{ paddingTop: '25px', clear: 'both' }}>
+          <Row style={{paddingTop: '25px', clear: 'both'}}>
             <Select
               value={this.props.selectedFollowUpIntents}
               onChange={(evt) => this.onChangeInput(evt, 'followUpIntents')}
-              options={intentFollowupOptions}
+              //options={}
               isMulti={true}
               isSearchable={true}
               placeholder={messages.followUpIntents.defaultMessage}
@@ -927,13 +927,18 @@ IntentPage.propTypes = {
   ]),
   onSuccess: React.PropTypes.func,
   resetForm: React.PropTypes.func,
+  createFollowUpIntent: React.PropTypes.func,
   setWindowSelection: React.PropTypes.func,
   onEditMode: React.PropTypes.func,
   onChangeAgentOfSlot: React.PropTypes.func,
   domainIntents: React.PropTypes.oneOfType([
     React.PropTypes.object,
     React.PropTypes.bool,
-  ])
+  ]),
+  parentSlots: React.PropTypes.oneOfType([
+  React.PropTypes.object,
+  React.PropTypes.bool,
+]),
 };
 
 IntentPage.defaultProps = {
@@ -1075,7 +1080,7 @@ const mapStateToProps = createStructuredSelector({
   currentAgent: makeSelectCurrentAgent(),
   postFormat: makeSelectPostFormatData(),
   domainIntents: makeSelectDomainIntents(),
-  selectedFollowUpIntents: makeSelectSelectedFollowUpIntents()
+  selectedFollowUpIntents: makeSelectSelectedFollowUpIntents(),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(IntentPage);

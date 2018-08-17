@@ -1,10 +1,16 @@
 import { createSelector } from 'reselect';
+import {selectGlobal} from "../App/selectors";
 
 const selectIntent = (state) => state.intent;
 
 const makeSelectIntentData = () => createSelector(
   selectIntent,
   (intentState) => intentState.intentData,
+);
+
+const makeSelectParentScenario = () => createSelector(
+  selectIntent,
+  (intentState) => intentState.parentScenario,
 );
 
 const makeSelectScenarioData = () => createSelector(
@@ -48,7 +54,11 @@ const makeSelectTouched = () => createSelector(
 );
 const makeSelectSelectedFollowUpIntents = () => createSelector(
   selectIntent,
-  (intentState) => intentState.selectedFollowUpIntents,
+  (intentState) => intentState.selectedFollowUpIntents
+);
+const makeSelectParentIntent = () => createSelector(
+  selectIntent,
+  (intentState) => intentState.parentIntent
 );
 
 export {
@@ -62,5 +72,7 @@ export {
   makeSelectOldWebhookData,
   makeSelectTouched,
   makeSelectPostFormatData,
-  makeSelectSelectedFollowUpIntents
+  makeSelectSelectedFollowUpIntents,
+  makeSelectParentIntent,
+  makeSelectParentScenario
 };

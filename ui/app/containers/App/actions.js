@@ -92,6 +92,7 @@ import {
   CHANGE_SETTINGS_DATA,
   RESET_SETTINGS_DATA,
   REMOVE_SETTINGS_FALLBACK,
+  SET_PARENT_INTENT
 } from './constants';
 
 export function loadAgents() {

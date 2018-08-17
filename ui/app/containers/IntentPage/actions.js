@@ -29,7 +29,9 @@ import {
   SORT_SLOTS,
   CHANGE_SLOT_AGENT,
   FIND_SYS_ENTITES,
-  RELOAD_INTENT_WITH_SYS_ENTITIES
+  RELOAD_INTENT_WITH_SYS_ENTITIES,
+  RESET_INTENT_DATA_FROM_PARENT,
+  SET_PARENT_INTENT, SET_PARENT_SCENARIO
 } from './constants';
 
 export function changeIntentData(payload) {
@@ -58,6 +60,30 @@ export function resetIntentData() {
   return {
     type: RESET_INTENT_DATA,
   };
+}
+
+export function resetIntentDataFromParent(parentIntent,parentScenario){
+  return {
+    type: RESET_INTENT_DATA_FROM_PARENT,
+    parentIntent,
+    parentScenario
+  }
+}
+
+export function setParentIntent(parentIntent) {
+  return {
+    type: SET_PARENT_INTENT,
+    apiCall: true,
+    parentIntent
+  }
+}
+
+export function setParentScenario(parentScenario) {
+  return {
+    type: SET_PARENT_SCENARIO,
+    apiCall: true,
+    parentScenario
+  }
 }
 
 export function untagEntity(example) {

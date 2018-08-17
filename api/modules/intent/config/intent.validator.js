@@ -105,7 +105,8 @@ class IntentValidate {
                     }),
                     intentResponses: ScenarioSchema.intentResponses,
                     followUpIntents: ScenarioSchema.followUpIntents.optional(),
-                    isBlockingIntent: ScenarioSchema.isBlockingIntent.required()
+                    isBlockingIntent: ScenarioSchema.isBlockingIntent.required(),
+                    parentIntent: ScenarioSchema.parentIntent.optional().min(-1).default(-1)
                 };
             })()
         };
@@ -139,7 +140,9 @@ class IntentValidate {
                     }),
                     intentResponses: ScenarioSchema.intentResponses,
                     followUpIntents : ScenarioSchema.followUpIntents.optional(),
-                    isBlockingIntent: ScenarioSchema.isBlockingIntent.required()
+                    isBlockingIntent: ScenarioSchema.isBlockingIntent.required(),
+                    parentIntent: ScenarioSchema.parentIntent.optional().default(-1).min(-1)
+
                 };
             })()
         };
