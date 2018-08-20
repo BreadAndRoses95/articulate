@@ -1,4 +1,4 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+import {LOCATION_CHANGE} from 'react-router-redux';
 
 import {
   call,
@@ -21,13 +21,13 @@ import {
   LOAD_AGENT_INTENTS,
   LOAD_DOMAINS_INTENTS
 } from '../../containers/App/constants';
-import { getAgentDomains } from '../../containers/DomainListPage/sagas';
+import {getAgentDomains} from '../../containers/DomainListPage/sagas';
 
 export function* getDomainIntents(payload) {
-  const { api, domainId, page, filter } = payload;
+  const {api, domainId, page, filter} = payload;
   let start = 0;
   let limit = -1;
-  if (page || page === 0){
+  if (page || page === 0) {
     start = page * 10;
     limit = start + 10;
   }
@@ -41,16 +41,16 @@ export function* getDomainIntents(payload) {
     const intents = response.obj;
     yield put(domainIntentsLoaded(intents));
   } catch (err) {
-    const errObject = { err };
-    if (errObject.err && errObject.err.message === 'Failed to fetch'){
-      yield put(domainIntentsLoadingError({ message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.' }));
+    const errObject = {err};
+    if (errObject.err && errObject.err.message === 'Failed to fetch') {
+      yield put(domainIntentsLoadingError({message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.'}));
     }
     else {
-      if (errObject.err.response.obj && errObject.err.response.obj.message){
-        yield put(domainIntentsLoadingError({ message: errObject.err.response.obj.message }));
+      if (errObject.err.response.obj && errObject.err.response.obj.message) {
+        yield put(domainIntentsLoadingError({message: errObject.err.response.obj.message}));
       }
       else {
-        yield put(domainIntentsLoadingError({ message: 'Unknow API error' }));
+        yield put(domainIntentsLoadingError({message: 'Unknow API error'}));
       }
     }
   }
@@ -95,10 +95,10 @@ export function* deleteIntent() {
 }
 
 export function* getAgentIntents(payload) {
-  const { api, agentId, page, filter } = payload;
+  const {api, agentId, page, filter} = payload;
   let start = 0;
   let limit = -1;
-  if (page || page === 0){
+  if (page || page === 0) {
     start = page * 10;
     limit = start + 10;
   }
@@ -112,16 +112,16 @@ export function* getAgentIntents(payload) {
     const intents = response.obj;
     yield put(loadAgentIntentsSuccess(intents));
   } catch (err) {
-    const errObject = { err };
-    if (errObject.err && errObject.err.message === 'Failed to fetch'){
-      yield put(loadAgentIntentsError({ message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.' }));
+    const errObject = {err};
+    if (errObject.err && errObject.err.message === 'Failed to fetch') {
+      yield put(loadAgentIntentsError({message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.'}));
     }
     else {
-      if (errObject.err.response.obj && errObject.err.response.obj.message){
-        yield put(loadAgentIntentsError({ message: errObject.err.response.obj.message }));
+      if (errObject.err.response.obj && errObject.err.response.obj.message) {
+        yield put(loadAgentIntentsError({message: errObject.err.response.obj.message}));
       }
       else {
-        yield put(loadAgentIntentsError({ message: 'Unknow API error' }));
+        yield put(loadAgentIntentsError({message: 'Unknow API error'}));
       }
     }
   }

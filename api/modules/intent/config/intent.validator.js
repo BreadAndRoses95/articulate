@@ -2,6 +2,7 @@
 
 const Joi = require('joi');
 const IntentSchema = require('../../../models/index').Intent.schema;
+const AgentSchema = require('../../../models/index').Agent.schema;
 const ScenarioSchema = require('../../../models/index').Scenario.schema;
 const WebhookSchema = require('../../../models/index').Webhook.schema;
 const SlotSchema = require('../../../models/index').Slot.schema;
@@ -77,7 +78,8 @@ class IntentValidate {
             params: (() => {
 
                 return {
-                    id: IntentSchema.id.required().description('Id of the intent')
+                    id: IntentSchema.id.required().description('Id of the intent'),
+                    agentId: AgentSchema.id.optional().description('Id of the agent')
                 };
             })()
         };

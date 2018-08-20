@@ -7,161 +7,132 @@ const Status = require('../../../helpers/status.json');
 module.exports = (request, reply) => {
 
     const intentId = request.params.id;
-    let intent;
-    let agentId;
-    let domainId;
     const server = request.server;
     const redis = server.app.redis;
+    let followUpIntents;
 
-    Async.waterfall([
-        (cb) => {
+    const getScenario = (intentId) => new Promise((resolve, reject) => {
+        // let followUpIntents = [];
 
-            server.inject(`/intent/${intentId}`, (res) => {
+        server.inject(`/intent/${intentId}/scenario`, (res) => {
 
-                if (res.statusCode !== 200){
-                    if (res.statusCode === 404){
-                        const error = Boom.notFound('The specified intent doesn\'t exists');
-                        return cb(error, null);
-                    }
-                    const error = Boom.create(res.statusCode, `An error occurred getting the data of the intent ${intentId}`);
-                    return cb(error, null);
+            if (res.statusCode !== 200) {
+                if (res.statusCode === 404) {
+                    const error = Boom.notFound('The specified intent doesn\'t exists');
+                    // return resolve([]);
                 }
-                intent = res.result;
-                return cb(null);
-            });
-        },
-        (callbackDeleteIntentAndReferences) => {
+                const error = Boom.create(res.statusCode, `An error occurred getting the data of the intent ${intentId}`);
 
-            Async.parallel([
-                (callbackDeleteIntent) => {
-
-                    redis.del(`intent:${intentId}`, (err, result) => {
-
-                        if (err){
-                            const error = Boom.badImplementation(`An error occurred deleting the intent ${intentId}`);
-                            return callbackDeleteIntent(error, null);
-                        }
-                        return callbackDeleteIntent(null);
-                    });
-                },
-                (callbackDeleteScenario) => {
-
-                    redis.del(`scenario:${intentId}`, (err, result) => {
-
-                        if (err){
-                            const error = Boom.badImplementation(`An error occurred deleting the scenario ${intentId}`);
-                            return callbackDeleteScenario(error, null);
-                        }
-                        return callbackDeleteScenario(null);
-                    });
-                },
-                (callbackDeleteWebhook) => {
-
-                    redis.del(`intentWebhook:${intentId}`, (err, result) => {
-
-                        if (err){
-                            const error = Boom.badImplementation(`An error occurred deleting the webhook of the intent ${intentId}`);
-                            return callbackDeleteWebhook(error, null);
-                        }
-                        return callbackDeleteWebhook(null);
-                    });
-                },
-                (callbackDeleteIntentFromTheDomain) => {
-
-                    Async.waterfall([
-                        (callbackGetAgentId) => {
-
-                            redis.zscore('agents', intent.agent, (err, score) => {
-
-                                if (err){
-                                    const error = Boom.badImplementation( `An error occurred retrieving the id of the agent ${intent.agent}`);
-                                    return callbackGetAgentId(error);
-                                }
-                                agentId = score;
-                                return callbackGetAgentId(null);
-                            });
-                        },
-                        (callbackGetDomain) => {
-
-                            redis.zscore(`agentDomains:${agentId}`, intent.domain, (err, score) => {
-
-                                if (err){
-                                    const error = Boom.badImplementation( `An error occurred retrieving the id of the domain ${intent.domain}`);
-                                    return callbackGetDomain(error);
-                                }
-                                domainId = score;
-                                return callbackGetDomain(null);
-                            });
-                        },
-                        (callbackRemoveFromDomainsList) => {
-
-                            redis.zrem(`domainIntents:${domainId}`, intent.intentName, (err, removeResult) => {
-
-                                if (err){
-                                    const error = Boom.badImplementation( `An error occurred removing the intent ${intentId} from the intents list of the domain ${domainId}`);
-                                    return callbackRemoveFromDomainsList(error);
-                                }
-                                return callbackRemoveFromDomainsList(null);
-                            });
-                        },
-                        (callbackRemoveFromEntitiesList) => {
-
-                            Async.eachSeries(intent.examples, (example, nextIntent) => {
-
-                                Async.eachSeries(example.entities, (entity, nextEntity) => {
-
-                                    redis.zrem(`entityIntents:${entity.entityId}`, intent.intentName, (err, addResponse) => {
-
-                                        if (err){
-                                            const error = Boom.badImplementation( `An error occurred removing the intent ${intentId} from the intents list of the entity ${entity.entityId}`);
-                                            return nextEntity(error);
-                                        }
-                                        return nextEntity(null);
-                                    });
-                                }, nextIntent);
-                            }, callbackRemoveFromEntitiesList);
-                        }
-                    ], (err, result) => {
-
-                        if (err){
-                            return callbackDeleteIntentFromTheDomain(err);
-                        }
-                        return callbackDeleteIntentFromTheDomain(null);
-                    });
-                }
-            ], (err, result) => {
-
-                if (err){
-                    return callbackDeleteIntentAndReferences(err);
-                }
-                return callbackDeleteIntentAndReferences(null);
-            });
-        }
-    ], (err) => {
-
-        if (err){
-            return reply(err, null);
-        }
-        IntentTools.updateEntitiesDomainTool(server, redis, { domain: intent.domain, examples: [] }, agentId, domainId, intent.examples, (err) => {
-
-            if (err) {
-                return reply(err);
+                // return resolve([]);
             }
-            redis.hmset(`agent:${agentId}`, { status: Status.outOfDate }, (err) => {
+            return resolve(res.result);
 
-                if (err){
-                    const error = Boom.badImplementation('An error occurred updating the agent status.');
-                    return reply(error);
-                }
-                redis.hmset(`domain:${domainId}`, { status: Status.outOfDate }, (err) => {
-
-                    if (err){
-                        const error = Boom.badImplementation('An error occurred updating the domain status.');
-                        return reply(error);
-                    }
-                    return reply({ message: 'successful operation' }).code(200);
-                });
-            });
         });
     });
-};
+    const intentsToDelete = [];
+
+    function getTreeRecursively(id) {
+        return getScenario(id, server).then(function (intent) {
+            let node = {id};
+            return Promise.all(intent.followUpIntents.map(getTreeRecursively)).then(function (followUpIntentFound) {
+                node.children = followUpIntentFound.followUpIntents;
+                intentsToDelete.push(id);
+                return node;
+            });
+        });
+    }
+
+    Async.waterfall([
+            (cb) => {
+                getTreeRecursively(intentId, server).then((tree) => {
+                    cb(null);
+                });
+            },
+            (cb) => {
+                getScenario(intentId).then((scenario) => {
+                    if (scenario.parentIntent >= 0) {
+                        getScenario(scenario.parentIntent).then((parentIntentScenario) => {
+                            parentIntentScenario.followUpIntents = parentIntentScenario.followUpIntents.filter((item) => {
+                                return item !== intentId;
+                            });
+                            delete parentIntentScenario.id;
+                            delete parentIntentScenario.agent;
+                            delete parentIntentScenario.domain;
+                            delete parentIntentScenario.intent;
+                            let options = {
+                                url: `/intent/${scenario.parentIntent}/scenario`,
+                                method: 'PUT',
+                                payload: parentIntentScenario
+                            };
+                            server.inject(options, (res) => {
+                                if (res.statusCode !== 200) {
+                                    const error = Boom.create(res.statusCode, `An error occurred updating the scenario of the parent intent ${parentIntentScenario.id}`);
+                                    return cb(error, null);
+                                }
+                                return cb(null);
+                            });
+                        });
+                    }
+                    else
+                        return cb(null);
+                })
+            },
+
+            (cb) => {
+                Async.forEach(intentsToDelete, (followUpIntent, callback) => {
+
+                    IntentTools.deleteIntentTool(server, redis, followUpIntent, (err, result) => {
+                        if (err) {
+                            return callback(err, null);
+                        }
+                        let {intent, agentId, domainId, examples} = result;
+                        IntentTools.updateEntitiesDomainTool(server, redis, {
+                            domain: intent.domain,
+                            examples: []
+                        }, agentId, domainId, examples, (err) => {
+
+                            if (err) {
+                                return callback(err);
+                            }
+                            redis.hmset(`agent:${agentId}`, {status: Status.outOfDate}, (err) => {
+
+                                if (err) {
+                                    const error = Boom.badImplementation('An error occurred updating the agent status.');
+                                    return callback(error, null);
+                                }
+                                redis.hmset(`domain:${domainId}`, {status: Status.outOfDate}, (err) => {
+
+                                    if (err) {
+                                        const error = Boom.badImplementation('An error occurred updating the domain status.');
+                                        return callback(error, null);
+                                    }
+                                    return callback(null, {message: 'successful operation'});
+                                });
+                            });
+                        });
+                    })
+                }, (err, result) => {
+                    if (err) {
+                        return cb(err, null);
+                    }
+                    else {
+                        return cb(null, result)
+                    }
+
+                });
+            }
+
+        ],
+        (err, result) => {
+            if (err) {
+                return reply(err, null);
+            }
+            else
+                return reply(null, result).code(200);
+        }
+    )
+}
+;
+
+
+

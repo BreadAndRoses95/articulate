@@ -31,8 +31,6 @@ import {
   UNTAG_ENTITY,
   SORT_SLOTS,
   RESET_INTENT_DATA_FROM_PARENT,
-  SET_PARENT_INTENT,
-  SET_PARENT_SCENARIO
 } from './constants';
 import messages from './messages';
 
@@ -73,7 +71,7 @@ const initialState = Immutable({
     intent: null,
     postFormatPayload: ''
   },
-  selectedFollowUpIntents : [],
+  selectedFollowUpIntents: [],
   touched: false,
   oldIntent: null,
   oldScenario: null,
@@ -81,7 +79,7 @@ const initialState = Immutable({
   oldPayloadJSON: '{\n\t"text": "{{text}}",\n\t"intent": {{{JSONstringify intent}}},\n\t"slots": {{{JSONstringify slots}}}\n}',
   oldPayloadXML: '<?xml version="1.0" encoding="UTF-8"?>\n<data>\n\t<text>{{text}}</text>\n\t<intent>{{{toXML intent}}}</intent>\n\t<slots>{{{toXML slots}}}</slots>\n</data>',
   parentIntent: null,
-  parentScenario: null
+  parentScenario: null,
 });
 
 function intentReducer(state = initialState, action) {
@@ -134,8 +132,8 @@ function intentReducer(state = initialState, action) {
         action.payload.value.map((followUpIntent) => {
           followUpIntents.push(followUpIntent.value);
         });
-        return state.setIn(['scenarioData','followUpIntents'], followUpIntents)
-          .set('selectedFollowUpIntents',action.payload.value)
+        return state.setIn(['scenarioData', 'followUpIntents'], followUpIntents)
+          .set('selectedFollowUpIntents', action.payload.value)
       }
 
       else if (action.payload.field === 'webhookUrl') {
@@ -197,31 +195,31 @@ function intentReducer(state = initialState, action) {
         .set('touched', true);
     case
     RESET_INTENT_DATA:
-      return initialState;
+        return initialState;
     case
     RESET_INTENT_DATA_FROM_PARENT:
       const {parentIntent, parentScenario} = action;
       return state.set('intentData', {
         agent: parentIntent.agent,
         domain: parentIntent.domain,
-        intentName: 'FollowUp-'+parentIntent.intentName,
+        intentName: 'FollowUp-' + parentIntent.intentName,
         examples: [],
         useWebhook: false,
         usePostFormat: false,
       })
         .set('scenarioData', {
-        agent: parentIntent.agent,
-        domain: parentIntent.domain,
-        intent: 'FollowUp-'+parentIntent.intentName,
-        scenarioName: 'FollowUp-'+parentIntent.intentName,
-        slots: parentScenario.slots,
-        intentResponses: [],
-        isBlockingIntent: false,
-        followUpIntents: [],
-        parentIntent: parentIntent.id
-      })
+          agent: parentIntent.agent,
+          domain: parentIntent.domain,
+          intent: 'FollowUp-' + parentIntent.intentName,
+          scenarioName: 'FollowUp-' + parentIntent.intentName,
+          slots: parentScenario.slots,
+          intentResponses: [],
+          isBlockingIntent: false,
+          followUpIntents: [],
+          parentIntent: parentIntent.id
+        })
         .set('parentScenario', parentScenario)
-      .set('parentIntent',parentIntent);
+        .set('parentIntent', parentIntent);
 
     case
     TAG_ENTITY:
@@ -397,7 +395,9 @@ function intentReducer(state = initialState, action) {
     LOAD_SCENARIO_SUCCESS:
       let previousSelectedFollowUpIntents;
       if (action.scenario.followUpIntents)
-        previousSelectedFollowUpIntents = action.scenario.followUpIntents.map((followUpIntent)=>{return {value: followUpIntent, label: followUpIntent}});
+        previousSelectedFollowUpIntents = action.scenario.followUpIntents.map((followUpIntent) => {
+          return {value: followUpIntent, label: followUpIntent}
+        });
       else
         previousSelectedFollowUpIntents = []
       return state
@@ -452,12 +452,6 @@ function intentReducer(state = initialState, action) {
       tempSlots.splice(action.newIndex, 0, tempSlots.splice(action.oldIndex, 1)[0]);
       return state
         .setIn(['scenarioData', 'slots'], Immutable(tempSlots));
-    case SET_PARENT_INTENT:
-      return state
-        .set('parentIntent',action.parentIntent);
-    case SET_PARENT_SCENARIO:
-      return state
-        .set('parentScenario',action.parentScenario);
     default:
       return state;
   }

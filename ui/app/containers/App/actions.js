@@ -92,7 +92,8 @@ import {
   CHANGE_SETTINGS_DATA,
   RESET_SETTINGS_DATA,
   REMOVE_SETTINGS_FALLBACK,
-  SET_PARENT_INTENT
+  SET_PARENT_INTENT_ID,
+  RESET_PARENT_INTENT_ID
 } from './constants';
 
 export function loadAgents() {
@@ -292,6 +293,13 @@ export function intentCreated(data, id) {
     data,
     id,
   };
+}
+
+export function setParentIntentId(parentIntent) {
+  return {
+    type: SET_PARENT_INTENT_ID,
+    parentIntent
+  }
 }
 
 export function intentCreationError(error) {
@@ -751,5 +759,10 @@ export function removeSettingsFallback(index) {
   return {
     type: REMOVE_SETTINGS_FALLBACK,
     index,
+  };
+
+}export function resetParentIntenId() {
+  return {
+    type: RESET_PARENT_INTENT_ID,
   };
 }

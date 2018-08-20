@@ -21,6 +21,18 @@ module.exports = (object, type) => {
             object.domainClassifierThreshold = parseFloat(object.domainClassifierThreshold);
             break;
         case 'context':
+            if (object.followUpIntents) {
+                if (object.followUpIntents === '') {
+                    if (object.followUpIntents.length === 0) {
+                        object.followUpIntents = [];
+                    }
+                }
+                else {
+                    object.followUpIntents = object.followUpIntents.map((followUpIntent) => {
+                        return parseInt(followUpIntent);
+                    })
+                }
+            }
             break;
         case 'domain':
             if (typeof object.enabled !== 'boolean') {

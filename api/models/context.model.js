@@ -9,7 +9,7 @@ class ScenarioModel {
             name: Joi.string().trim(),
             scenario: Joi.string().trim(),
             slots: Joi.object(),
-            followUpIntents: Joi.array().items(Joi.string().trim())
+            followUpIntents: Joi.array().items(Joi.number())
         };
     };
 }

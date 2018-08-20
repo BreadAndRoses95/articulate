@@ -89,6 +89,7 @@ import {
   CHANGE_SETTINGS_DATA,
   RESET_SETTINGS_DATA,
   REMOVE_SETTINGS_FALLBACK,
+  SET_PARENT_INTENT_ID, RESET_PARENT_INTENT_ID
 } from './constants';
 
 // The initial state of the App
@@ -122,7 +123,8 @@ const initialState = Immutable({
     intentClassifierPipeline: [],
     entityClassifierPipeline: [],
     defaultAgentFallbackResponses: []
-  }
+  },
+  parentIntentId: -1
 });
 
 function appReducer(state = initialState, action) {
@@ -529,6 +531,11 @@ function appReducer(state = initialState, action) {
     case REMOVE_SETTINGS_FALLBACK:
       return state
         .updateIn(['settingsData', 'defaultAgentFallbackResponses'], fallbackResponses => fallbackResponses.filter((item, index) => index !== action.index));
+    case SET_PARENT_INTENT_ID:
+      return state.set("parentIntentId",action.parentIntent.id);
+    case RESET_PARENT_INTENT_ID:
+      return state.set("parentIntentId",-1);
+
     default:
       return state;
   }

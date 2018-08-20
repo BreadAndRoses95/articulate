@@ -127,6 +127,52 @@ module.exports = (request, reply) => {
         if (err){
             return reply(err, null);
         }
-        return reply(result.scenario);
+        if (scenario.parentIntent >= 0){
+            let server = request.server;
+            let parentIntentScenario;
+            Async.series([
+
+                (cb) => server.inject(`/intent/${scenario.parentIntent}/scenario`, (res) => {
+
+                    if (res.statusCode !== 200) {
+                        if (res.statusCode === 404) {
+                            const error = Boom.notFound('The specified parent intent doesn\'t exists');
+                            return cb(error);
+                        }
+                        const error = Boom.create(res.statusCode, `An error occurred getting the data of the parent intent ${intentId}`);
+
+                        return cb(error);
+                    }
+                    parentIntentScenario = res.result;
+                    delete parentIntentScenario.id;
+                    delete parentIntentScenario.agent;
+                    delete parentIntentScenario.domain;
+                    delete parentIntentScenario.intent;
+                    parentIntentScenario.followUpIntents.push(parseInt(intentId));
+                    return cb(null);
+                }),
+                (cb) => {
+                    let options = {
+                        url: `/intent/${scenario.parentIntent}/scenario`,
+                        method: 'PUT',
+                        payload: parentIntentScenario};
+                server.inject(options,(res)=>{
+                    if (res.statusCode !== 200) {
+                        const error = Boom.create(res.statusCode, `An error occurred updating the scenario of the parent intent ${parentIntentScenario.id}`);
+                        return cb(error, null);
+                    }
+                    return cb(null);
+                })}
+
+            ],(err)=>{
+                if (err)
+                    return reply(err, null);
+                else
+                    return reply(result.scenario);
+            })
+        }
+        else {
+            return reply(result.scenario);
+        }
     });
 };

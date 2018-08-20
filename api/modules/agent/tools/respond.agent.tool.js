@@ -100,8 +100,13 @@ const getIntentData = (conversationStateObject) => {
         if (conversationStateObject.agent.domains) {
             const agentIntents = _.compact(_.flatten(_.map(conversationStateObject.agent.domains, 'intents')));
             if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length >0){
+                const followUpIntentsName = conversationStateObject.currentContext.followUpIntents.map((followUpIntentId) => {
+                    return agentIntents.filter((agentIntent)=>{
+                        return agentIntent.id === followUpIntentId;
+                    })[0].intentName
+                });
                 const intentLit = _.filter(conversationStateObject.rasaResult.intent_ranking, (intentFound)=>{
-                    return conversationStateObject.currentContext.followUpIntents.indexOf(intentFound.name) > -1
+                    return followUpIntentsName.indexOf(intentFound.name) > -1
                 });
                 const intent = intentLit[0];
                 conversationStateObject.rasaResult.intent = intent;

@@ -5,10 +5,10 @@ import {
   Input,
   Row,
 } from 'react-materialize';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import Alert from 'react-s-alert';
-import { push } from 'react-router-redux';
-import { createStructuredSelector } from 'reselect';
+import {push} from 'react-router-redux';
+import {createStructuredSelector} from 'reselect';
 import ActionButton from '../../components/ActionButton/index';
 import Content from '../../components/Content';
 import ContentHeader from '../../components/ContentHeader';
@@ -23,11 +23,10 @@ import {
   loadAgentIntents,
   loadDomainIntents,
   resetAgentDomains,
-  resetDomainIntents,
+  resetDomainIntents, resetParentIntenId,
+  setParentIntentId
 } from '../../containers/App/actions';
-import {
-  setParentIntent
-} from '../IntentPage/actions'
+
 
 import {
   makeSelectAgentDomains,
@@ -68,7 +67,7 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
     this.loadDomains(this.props.currentAgent);
   }
 
-  componentDidUpdate(){
+  componentDidUpdate() {
 
     if (this.props.error) {
       Alert.error(this.props.error.message, {
@@ -133,7 +132,7 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
   }
 
   onDelete() {
-    const { intentToDelete, selectedDomain } = this.state;
+    const {intentToDelete, selectedDomain} = this.state;
     this.props.onDeleteIntent(intentToDelete, selectedDomain ? selectedDomain : this.props.currentAgent, selectedDomain ? 'domain' : 'agent');
     this.onDeleteDismiss();
   }
@@ -164,12 +163,14 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
       label: 'Delete',
       action: (intent) => this.onDeletePrompt(intent),
     },
-      {label: 'Add follow up intent',
-      action: (intent) => this.onAddFollowUpIntent(intent)}];
+      {
+        label: 'Add follow up intent',
+        action: (intent) => this.onAddFollowUpIntent(intent)
+      }];
   }
 
   render() {
-    const { loading, error, agentDomains, domainIntents, currentAgent } = this.props;
+    const {loading, error, agentDomains, domainIntents, currentAgent} = this.props;
     const domainProps = {
       loading,
       error,
@@ -177,16 +178,16 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
     };
 
     let breadcrumbs = [
-      { label: 'Agent' },
+      {label: 'Agent'},
     ];
     if (currentAgent) {
-      breadcrumbs.push({ link: `/agent/${currentAgent.id}`, label: `${currentAgent.agentName}` });
+      breadcrumbs.push({link: `/agent/${currentAgent.id}`, label: `${currentAgent.agentName}`});
     }
-    breadcrumbs.push({ label: 'Intents' });
+    breadcrumbs.push({label: 'Intents'});
 
     let domainsSelect = [];
     if (agentDomains !== false) {
-      const defaultOption = { value: 'default', text: 'Please choose a domain', disabled: 'disabled' };
+      const defaultOption = {value: 'default', text: 'Please choose a domain', disabled: 'disabled'};
 
       const options = agentDomains.domains.map((domain) => ({
         value: domain.id,
@@ -194,27 +195,27 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
       }));
       domainsSelect = [defaultOption, ...options];
     } else {
-      const defaultOption = { value: 'default', text: 'No domains available for selected agent', disabled: 'disabled' };
+      const defaultOption = {value: 'default', text: 'No domains available for selected agent', disabled: 'disabled'};
       domainsSelect = [defaultOption];
     }
 
     return (
       <div>
-        <Col style={{ zIndex: 2, position: 'fixed', top: '50%', left: '45%' }} s={12}>
-          {domainProps.loading ? <Preloader color={'#00ca9f'} size={'big'} /> : null}
+        <Col style={{zIndex: 2, position: 'fixed', top: '50%', left: '45%'}} s={12}>
+          {domainProps.loading ? <Preloader color={'#00ca9f'} size={'big'}/> : null}
         </Col>
         <Helmet
           title="Agent Intents"
           meta={[
-            { name: 'description', content: 'Review the list of intents' },
+            {name: 'description', content: 'Review the list of intents'},
           ]}
         />
         <Header
           breadcrumbs={breadcrumbs} actionButtons={
-          <ActionButton label={messages.actionButton} onClick={this.onCreateAction} />}
+          <ActionButton label={messages.actionButton} onClick={this.onCreateAction}/>}
         />
         <Content>
-          <ContentHeader title={messages.domainListTitle} subTitle={messages.domainListDescription} />
+          <ContentHeader title={messages.domainListTitle} subTitle={messages.domainListDescription}/>
           <Form>
             <Row>
               <Input
@@ -230,9 +231,9 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
             </Row>
             <Row>
               <IntentsTable
-                data={domainIntents || { intents: [], total: 0 }}
+                data={domainIntents || {intents: [], total: 0}}
                 menu={this.renderMenu()}
-                onReloadData={this.props.onReloadData.bind(null, this.state.selectedDomain ? this.state.selectedDomain.id : null , currentAgent ? currentAgent.id : 0)}
+                onReloadData={this.props.onReloadData.bind(null, this.state.selectedDomain ? this.state.selectedDomain.id : null, currentAgent ? currentAgent.id : 0)}
                 onCellChange={() => {
                 }}
               />
@@ -280,15 +281,16 @@ export function mapDispatchToProps(dispatch) {
     onReset() {
       dispatch(resetAgentDomains());
       dispatch(resetDomainIntents());
+      dispatch(resetParentIntenId());
     },
     onLoadDomains(agent) {
       dispatch(loadAgentDomains(agent.id));
     },
     onLoadIntents: (domain, agent) => {
       if (domain) {
-        return dispatch(loadDomainIntents(domain.id,0));
+        return dispatch(loadDomainIntents(domain.id, 0));
       }
-      dispatch(loadAgentIntents(agent.id,0));
+      dispatch(loadAgentIntents(agent.id, 0));
     },
     onChangeUrl: (url) => dispatch(push(url)),
     onDeleteIntent: (intent, parent, filter) => {
@@ -301,8 +303,8 @@ export function mapDispatchToProps(dispatch) {
       dispatch(loadAgentIntents(agentId, page, filter));
     },
     onAddFollowUpIntent: (intent) => {
+      dispatch(setParentIntentId(intent));
       dispatch(push("/intents/create"));
-      dispatch(setParentIntent(intent));
       //return dispatch(addFollowUpIntent(intent));
     }
   };

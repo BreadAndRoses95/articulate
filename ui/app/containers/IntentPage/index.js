@@ -36,7 +36,7 @@ import Tooltip from '../../components/Tooltip';
 import {
   createIntent,
   loadAgentDomains,
-  loadAgentEntities,
+  loadAgentEntities, resetParentIntenId,
   resetStatusFlags,
   updateIntent,
 } from '../App/actions';
@@ -47,7 +47,7 @@ import {
   makeSelectError,
   makeSelectLoading,
   makeSelectSuccess,
-  makeSelectDomainIntents,
+  makeSelectDomainIntents, makeSelectParentIntentId,
 } from '../App/selectors';
 import {
   addSlot,
@@ -70,7 +70,7 @@ import {
   loadPostFormat,
   sortSlots,
   changeSlotAgent,
-  findSysEntities,
+  findSysEntities, setParentIntentScenario,
 } from './actions';
 import AvailableSlots from './Components/AvailableSlots';
 import Responses from './Components/Responses';
@@ -197,7 +197,6 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
 
   onChangeInput(evt, field) {
     let value;
-    //console.log(evt,field);
     if (evt && evt.target) {
       value = evt.target.type === 'checkbox' ? evt.target.checked : evt.target.value;
     } else {
@@ -348,7 +347,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
       this.setState({editMode: true});
       this.props.onEditMode(this.props);
     } else {
-      this.props.resetForm();
+      this.props.resetForm(this.props.parentIntentId);
       this.setState({editMode: false});
       const {currentAgent} = this.props;
       if (currentAgent) {
@@ -459,16 +458,6 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
       success,
       intent,
     };
-    const customStyles = {
-      // multipleValue: (base, state) => {
-      //   return { ...base, color: state.isFocused ? 'blue' : 'red' };
-      // },
-      // container: (base,state) => {
-      //   console.log(base);
-      //   console.log(state);
-      //   return {...base,  width: '50%', float: state.isSelected?'right':'left'}
-      // }
-    }
 
     let domainsSelect = [];
     if (agentDomains !== false) {
@@ -935,10 +924,10 @@ IntentPage.propTypes = {
     React.PropTypes.object,
     React.PropTypes.bool,
   ]),
-  parentSlots: React.PropTypes.oneOfType([
-  React.PropTypes.object,
-  React.PropTypes.bool,
-]),
+  parentIntentId: React.PropTypes.oneOfType([
+    React.PropTypes.number,
+    React.PropTypes.bool,
+  ])
 };
 
 IntentPage.defaultProps = {
@@ -953,7 +942,6 @@ export function mapDispatchToProps(dispatch) {
         dispatch(loadAgentDomains(value));
         dispatch(loadAgentEntities(value, null, null, true));
       }
-      //console.log(value,field)
       dispatch(changeIntentData({value, field}));
     },
     onChangeWebhookData: (field, evt) => {
@@ -1037,8 +1025,12 @@ export function mapDispatchToProps(dispatch) {
     onSuccess: () => {
       dispatch(resetStatusFlags());
     },
-    resetForm: () => {
-      dispatch(resetIntentData());
+    resetForm: (parentIntentId = -1) => {
+      if (parentIntentId <= 0)
+        dispatch(resetIntentData());
+      else {
+        dispatch(setParentIntentScenario(parentIntentId));
+      }
     },
     setWindowSelection: (selection) => {
       dispatch(setWindowSelection(selection));
@@ -1080,7 +1072,7 @@ const mapStateToProps = createStructuredSelector({
   currentAgent: makeSelectCurrentAgent(),
   postFormat: makeSelectPostFormatData(),
   domainIntents: makeSelectDomainIntents(),
-  selectedFollowUpIntents: makeSelectSelectedFollowUpIntents(),
+  parentIntentId: makeSelectParentIntentId()
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(IntentPage);

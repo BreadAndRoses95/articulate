@@ -31,7 +31,7 @@ import {
   FIND_SYS_ENTITES,
   RELOAD_INTENT_WITH_SYS_ENTITIES,
   RESET_INTENT_DATA_FROM_PARENT,
-  SET_PARENT_INTENT, SET_PARENT_SCENARIO
+  SET_PARENT_SCENARIO, SET_PARENT_INTENT_SCENARIO
 } from './constants';
 
 export function changeIntentData(payload) {
@@ -70,21 +70,14 @@ export function resetIntentDataFromParent(parentIntent,parentScenario){
   }
 }
 
-export function setParentIntent(parentIntent) {
+export function setParentIntentScenario(parentIntentId){
   return {
-    type: SET_PARENT_INTENT,
-    apiCall: true,
-    parentIntent
+    type: SET_PARENT_INTENT_SCENARIO,
+    apiCall:true,
+    parentIntentId,
   }
 }
 
-export function setParentScenario(parentScenario) {
-  return {
-    type: SET_PARENT_SCENARIO,
-    apiCall: true,
-    parentScenario
-  }
-}
 
 export function untagEntity(example) {
   return {

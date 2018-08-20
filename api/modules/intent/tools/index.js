@@ -2,6 +2,7 @@
 const ValidateEntitiesTool = require('./validateEntities.intent.tool');
 const ValidateEntitiesScenarioTool = require('./validateEntities.scenario.tool');
 const UpdateEntitiesDomainTool = require('./updateEntitiesDomain.intent.tool');
+const DeleteIntentTool = require('./deleteIntent.intent.tool');
 
 const IntentTools = {
 
@@ -9,7 +10,9 @@ const IntentTools = {
 
     validateEntitiesScenarioTool: ValidateEntitiesScenarioTool,
 
-    updateEntitiesDomainTool: UpdateEntitiesDomainTool
+    updateEntitiesDomainTool: UpdateEntitiesDomainTool,
+
+    deleteIntentTool: DeleteIntentTool
 };
 
 module.exports = IntentTools;
