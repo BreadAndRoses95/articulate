@@ -90,7 +90,6 @@ import {
   makeSelectWebhookData,
   makeSelectOldIntentData,
   makeSelectPostFormatData,
-  makeSelectSelectedFollowUpIntents,
   makeSelectParentIntent
 } from './selectors';
 
@@ -466,7 +465,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
         text: 'Please choose a domain to place your intent',
         disabled: 'disabled'
       };
-      const options = agentDomains.domains.map((domain) => ({
+      const options = agentDomains.domains.filter((domain)=>{return !domain.isFollowUpDomain}).map((domain) => ({
         value: domain.domainName,
         text: domain.domainName,
       }));
@@ -524,15 +523,18 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                 onChange={(evt) => this.onChangeInput(evt, 'isBlockingIntent')}
                 checked={this.props.scenarioData.isBlockingIntent}
               />
-              <Input
-                s={12}
-                type="select"
-                label={messages.domain.defaultMessage}
-                value={intent.domain ? intent.domain : 'default'}
-                onChange={(evt) => this.onChangeInput(evt, 'domain')}
-              >
-                {returnFormattedOptions(domainsSelect)}
-              </Input>
+              {this.props.parentIntentId === -1 && this.props.scenarioData.parentIntent === -1?
+                <Input
+                  s={12}
+                  type="select"
+                  label={messages.domain.defaultMessage}
+                  value={intent.domain ? intent.domain : 'default'}
+                  onChange={(evt) => this.onChangeInput(evt, 'domain')}
+                  disabled={this.state.editMode ? true : false}
+                >
+                  {returnFormattedOptions(domainsSelect)}
+                </Input> : null
+               }
               <FormTextInput
                 label={messages.intentName}
                 placeholder={messages.intentNamePlaceholder.defaultMessage}
@@ -849,17 +851,17 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
               </Form> : null
 
           }
-          <Row style={{paddingTop: '25px', clear: 'both'}}>
-            <Select
-              value={this.props.selectedFollowUpIntents}
-              onChange={(evt) => this.onChangeInput(evt, 'followUpIntents')}
-              //options={}
-              isMulti={true}
-              isSearchable={true}
-              placeholder={messages.followUpIntents.defaultMessage}
-              // styles={customStyles? customStyles : {}}
-            />
-          </Row>
+          {/*<Row style={{paddingTop: '25px', clear: 'both'}}>*/}
+            {/*<Select*/}
+              {/*value={this.props.selectedFollowUpIntents}*/}
+              {/*onChange={(evt) => this.onChangeInput(evt, 'followUpIntents')}*/}
+              {/*//options={}*/}
+              {/*isMulti={true}*/}
+              {/*isSearchable={true}*/}
+              {/*placeholder={messages.followUpIntents.defaultMessage}*/}
+              {/*// styles={customStyles? customStyles : {}}*/}
+            {/*/>*/}
+          {/*</Row>*/}
         </Content>
         <ConfirmationModal
           isOpen={this.state.displayModal}

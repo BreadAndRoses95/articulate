@@ -13,8 +13,11 @@ const buildDomainRecognitionTrainingData = (server, agentId, extraTrainingData, 
         }
 
         let countOfDomainsWithIntents = 0;
-        data.forEach((domain) => {
 
+        //Avoid train domain recognition on followUpDomains
+        data.filter((domain)=> {return !domain.isFollowUpDomain});
+
+        data.forEach((domain) => {
             countOfDomainsWithIntents += (domain.intents.length > 0 ? 1 : 0);
         });
         if (countOfDomainsWithIntents < 2){

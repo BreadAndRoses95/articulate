@@ -13,7 +13,8 @@ class DomainModel {
             status: Joi.string().trim(),
             lastTraining: Joi.date(),
             model: Joi.string().trim(),
-            extraTrainingData: Joi.boolean()
+            extraTrainingData: Joi.boolean(),
+            isFollowUpDomain: Joi.boolean()
         };
     };
 }

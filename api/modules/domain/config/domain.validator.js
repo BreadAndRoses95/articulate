@@ -15,7 +15,8 @@ class DomainValidate {
                     intentThreshold: DomainSchema.intentThreshold.required(),
                     lastTraining: DomainSchema.lastTraining,
                     model: DomainSchema.model,
-                    extraTrainingData: DomainSchema.extraTrainingData
+                    extraTrainingData: DomainSchema.extraTrainingData,
+                    isFollowUpDomain: DomainSchema.isFollowUpDomain.default(false)
                 };
             })()
         };
@@ -45,7 +46,9 @@ class DomainValidate {
                     lastTraining: DomainSchema.lastTraining,
                     status: DomainSchema.status,
                     model: DomainSchema.model,
-                    extraTrainingData: DomainSchema.extraTrainingData
+                    extraTrainingData: DomainSchema.extraTrainingData,
+                    isFollowUpDomain: DomainSchema.isFollowUpDomain.default(false)
+
                 };
             })()
         };

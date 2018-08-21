@@ -37,7 +37,8 @@ export default defineMessages({
   },
   intentThresholdDescription: {
     id: 'containers.DomainPage.create_domain.intent_threshold_description',
-    defaultMessage: 'This threshold determines how confident your agent has to be that a user\'s request matches an intent inside the domain. Higher values are likely to fallback. Lower values are more likely to mis-classify.'
+    defaultMessage: 'This threshold determines how confident your agent has to be that a user\'s request matches an intent inside the domain. Higher values are likely to fallback. Lower values are more likely to mis-classify.',
+    followUpDomainMessage: 'Users are blocked in follow up domains until one of the domain\'s action is completed, this threshold helps you keeping your user safe from looping after falling in follow up domain'
   },
   createButton: {
     id: 'containers.DomainPage.create_domain.create_button',
@@ -62,5 +63,9 @@ export default defineMessages({
   expandedTrainingDataTooltip: {
     id: 'containers.DomainPage.create_agent.expanded_training_data_tooltip',
     defaultMessage: 'Create combinations between your entities and intents. On small agents this can improve classification, as your agent grows this may increase training time.',
+  },
+  followUpDomainTooltip: {
+    id :'containers.DomainPage.create_agent.followup_domain_tooltip',
+    defaultMessage: 'Follow up domains have fix name'
   }
 });

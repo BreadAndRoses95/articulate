@@ -201,7 +201,7 @@ function intentReducer(state = initialState, action) {
       const {parentIntent, parentScenario} = action;
       return state.set('intentData', {
         agent: parentIntent.agent,
-        domain: parentIntent.domain,
+        domain: 'FollowUp-' + parentIntent.id,
         intentName: 'FollowUp-' + parentIntent.intentName,
         examples: [],
         useWebhook: false,
@@ -209,7 +209,7 @@ function intentReducer(state = initialState, action) {
       })
         .set('scenarioData', {
           agent: parentIntent.agent,
-          domain: parentIntent.domain,
+          domain:'FollowUp-' + parentIntent.id,
           intent: 'FollowUp-' + parentIntent.intentName,
           scenarioName: 'FollowUp-' + parentIntent.intentName,
           slots: parentScenario.slots,

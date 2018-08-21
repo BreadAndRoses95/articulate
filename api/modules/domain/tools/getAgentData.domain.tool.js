@@ -49,7 +49,7 @@ const getAgentData = (server, agentId, cb) => {
                     if (err){
                         return cllback(err);
                     }
-                    Object.assign(result, { domainId: domain.id, domainName: domain.domainName });
+                    Object.assign(result, { domainId: domain.id, domainName: domain.domainName, isFollowUpDomain: domain.isFollowUpDomain });
                     return cllback(null, result);
                 });
 

@@ -156,6 +156,9 @@ export class DomainPage extends React.PureComponent { // eslint-disable-line rea
                 value={domain.domainName}
                 onChange={(evt) => this.onChangeInput(evt, 'domainName')}
                 required
+                disabled = {this.props.domain.isFollowUpDomain}
+                tooltip={this.props.domain.isFollowUpDomain? messages.followUpDomainTooltip.defaultMessage: null}
+
               />
             </Row>
           </Form>
@@ -163,7 +166,7 @@ export class DomainPage extends React.PureComponent { // eslint-disable-line rea
           <Row>
             <SliderInput
               label={messages.intentThreshold}
-              tooltip={messages.intentThresholdDescription.defaultMessage}
+              tooltip={this.props.domain.isFollowUpDomain? messages.intentThresholdDescription.followUpDomainMessage: messages.intentThresholdDescription.defaultMessage}
               min="0"
               max="100"
               name="intentThreshold"

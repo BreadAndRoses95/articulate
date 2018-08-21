@@ -76,17 +76,17 @@ const retrainModel = (server, rasa, language, agentName, agentId, domainName, do
         (domain, cb) => {
 
             if (!domain.model){
-                return cb(null);
+                return cb(null,domain);
             }
             Wreck.delete(`${rasa}/models?project=${agentName}&model=${domain.domainName}_${domain.model}`, {}, (err, wreckResponse, payload) => {
 
                 if (err) {
                     console.log(`The model ${domain.domainName}_${domain.model} wasn't unloaded`);
                 }
-                return cb(null);
+                return cb(null,domain);
             });
         }
-    ], (err) => {
+    ], (err,domain) => {
 
         if (err){
             if (err.noTrainingData){
@@ -98,7 +98,8 @@ const retrainModel = (server, rasa, language, agentName, agentId, domainName, do
         const trainingDate = new Date().toISOString();
         const updateDomainPayload = {
             lastTraining: trainingDate,
-            model
+            model,
+            isFollowUpDomain: domain.isFollowUpDomain
         };
 
         const options = {

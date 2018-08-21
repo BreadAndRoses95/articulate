@@ -38,7 +38,7 @@ module.exports = (request, reply) => {
                 },
                 (callback) => {
 
-                    Async.parallel([
+                    Async.series([
                         (cllbk) => {
 
                             redis.zscore(`agentDomains:${agentId}`, intent.domain, (err, id) => {
@@ -51,8 +51,32 @@ module.exports = (request, reply) => {
                                     domainId = id;
                                     return cllbk(null);
                                 }
-                                const error = Boom.badRequest(`The domain ${intent.domain} doesn't exist in the agent ${intent.agent}`);
-                                return cllbk(error);
+                                if (intent.domain.indexOf("FollowUp-")>-1){
+                                    let domainData = {
+                                        agent: intent.agent,
+                                        domainName: intent.domain,
+                                        enabled: true,
+                                        intentThreshold: 0.5,
+                                        isFollowUpDomain:true
+                                    }
+                                    let options = {
+                                        url: `/domain`,
+                                        method: 'POST',
+                                        payload: domainData
+                                    };
+                                    server.inject(options, (res) => {
+                                        if (res.statusCode !== 200) {
+                                            const error = Boom.create(res.statusCode, `An error occurred adding new domain for follow up intents of the parent intent ${intent.id}`);
+                                            return cllbk(error, null);
+                                        }
+                                        domainId = res.result.id;
+                                        return cllbk(null);
+                                    });
+                                }
+                                else {
+                                    const error = Boom.badRequest(`The domain ${intent.domain} doesn't exist in the agent ${intent.agent}`);
+                                    return cllbk(error);
+                                }
                             });
                         },
                         (cllbk) => {

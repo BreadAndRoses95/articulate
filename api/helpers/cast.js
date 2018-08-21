@@ -38,6 +38,9 @@ module.exports = (object, type) => {
             if (typeof object.enabled !== 'boolean') {
                 object.enabled = object.enabled === 'true';
             }
+            if (typeof object.isFollowUpDomain !== 'boolean') {
+                object.isFollowUpDomain = object.isFollowUpDomain === 'true';
+            }
             if (typeof object.extraTrainingData !== 'boolean') {
                 object.extraTrainingData = object.extraTrainingData === 'true';
             }

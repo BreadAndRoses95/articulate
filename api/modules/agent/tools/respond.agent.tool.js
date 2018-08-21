@@ -43,8 +43,28 @@ const getEntitiesFromRasaResults = (conversationStateObject) => {
 const getBestRasaResult = (conversationStateObject) => {
 
     let rasaResult = {};
+    const normalDomainsName = conversationStateObject.agent.domains.map((domain)=>{
+        if (!domain.isFollowUpDomain){
+            return domain.domainName;
+        }
+    }).filter((domainName)=>{return domainName;});
+
+    if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length >0){
+        //let's keep follow up domain parse only
+        conversationStateObject.parse = conversationStateObject.parse.filter((domainParsed)=>{
+            return domainParsed.domain === 'FollowUp-' + conversationStateObject.lastIntent.id;
+        })
+        rasaResult.entities = getEntitiesFromRasaResults(conversationStateObject);
+    }
+    else {
+        // Not in follow up case, keep only the normal domains.
+        conversationStateObject.parse = conversationStateObject.parse.filter((domainParsed)=>{
+            return normalDomainsName.indexOf(domainParsed.domain) > -1;
+        })
+    }
 
     const recognizedDomain = conversationStateObject.parse[0];
+
 
     if (conversationStateObject.parse.length > 0 && recognizedDomain.domainScore > conversationStateObject.agent.domainClassifierThreshold) {
         rasaResult = recognizedDomain;
@@ -99,19 +119,21 @@ const getIntentData = (conversationStateObject) => {
     if (conversationStateObject.rasaResult.intent) {
         if (conversationStateObject.agent.domains) {
             const agentIntents = _.compact(_.flatten(_.map(conversationStateObject.agent.domains, 'intents')));
-            if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length >0){
-                const followUpIntentsName = conversationStateObject.currentContext.followUpIntents.map((followUpIntentId) => {
-                    return agentIntents.filter((agentIntent)=>{
-                        return agentIntent.id === followUpIntentId;
-                    })[0].intentName
-                });
-                const intentLit = _.filter(conversationStateObject.rasaResult.intent_ranking, (intentFound)=>{
-                    return followUpIntentsName.indexOf(intentFound.name) > -1
-                });
-                const intent = intentLit[0];
-                conversationStateObject.rasaResult.intent = intent;
-                // conversationStateObject.rasaResult.intent.confidence = 1;
-            }
+            //This is useless since we've filtered the rasaResult
+            // if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length >0){
+            //     const followUpIntentsName = conversationStateObject.currentContext.followUpIntents.map((followUpIntentId) => {
+            //         return agentIntents.filter((agentIntent)=>{
+            //             return agentIntent.id === followUpIntentId;
+            //         })[0].intentName
+            //     });
+            //
+            //     const intentLit = _.filter(conversationStateObject.rasaResult.intent_ranking, (intentFound)=>{
+            //         return followUpIntentsName.indexOf(intentFound.name) > -1
+            //     });
+            //     const intent = intentLit[0];
+            //     conversationStateObject.rasaResult.intent = intent;
+            //     // conversationStateObject.rasaResult.intent.confidence = 1;
+            // }
             //should not be able to 
             const intent = _.filter(agentIntents, (agentIntent) => {
                 return agentIntent.intentName === conversationStateObject.rasaResult.intent.name ;
@@ -261,10 +283,9 @@ module.exports = (server, conversationStateObject,  callback, followUpIntent = f
     var isActionIncomplete = false;
 
     conversationStateObject.currentContext = getCurrentContext(conversationStateObject);
+    conversationStateObject.lastIntent = getPreviousIntentData(conversationStateObject);
     if (conversationStateObject.parse) {
         conversationStateObject.rasaResult = getBestRasaResult(conversationStateObject);
-
-        conversationStateObject.lastIntent = getPreviousIntentData(conversationStateObject);
 
         isActionIncomplete = findIsActionIncomplete(conversationStateObject);
 
