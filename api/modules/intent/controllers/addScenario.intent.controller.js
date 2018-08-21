@@ -162,7 +162,7 @@ module.exports = (request, reply) => {
                         return cb(error, null);
                     }
                     return cb(null);
-                })}
+                })},
 
             ],(err)=>{
                 if (err)

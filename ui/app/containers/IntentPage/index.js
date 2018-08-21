@@ -857,7 +857,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
               isMulti={true}
               isSearchable={true}
               placeholder={messages.followUpIntents.defaultMessage}
-              styles={customStyles}
+              // styles={customStyles? customStyles : {}}
             />
           </Row>
         </Content>
