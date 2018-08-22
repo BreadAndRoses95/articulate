@@ -99,7 +99,8 @@ const retrainModel = (server, rasa, language, agentName, agentId, domainName, do
         const updateDomainPayload = {
             lastTraining: trainingDate,
             model,
-            isFollowUpDomain: domain.isFollowUpDomain
+            isFollowUpDomain: domain.isFollowUpDomain,
+
         };
 
         const options = {

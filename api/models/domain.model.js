@@ -14,7 +14,8 @@ class DomainModel {
             lastTraining: Joi.date(),
             model: Joi.string().trim(),
             extraTrainingData: Joi.boolean(),
-            isFollowUpDomain: Joi.boolean()
+            isFollowUpDomain: Joi.boolean(),
+            isBlockingFollowUpDomain: Joi.boolean()
         };
     };
 }

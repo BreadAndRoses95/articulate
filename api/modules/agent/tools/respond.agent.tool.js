@@ -54,7 +54,7 @@ const getBestRasaResult = (conversationStateObject) => {
         conversationStateObject.parse = conversationStateObject.parse.filter((domainParsed)=>{
             return domainParsed.domain === 'FollowUp-' + conversationStateObject.lastIntent.id;
         })
-        rasaResult.entities = getEntitiesFromRasaResults(conversationStateObject);
+        rasaResult.entities = getEntitiesFromRasaResults(conversationStateObject); //TODO: could change this to keep track of domain on ID only and allow renaming
     }
     else {
         // Not in follow up case, keep only the normal domains.
@@ -185,7 +185,7 @@ const findIsActionIncomplete = (conversationStateObject) => {
     if (conversationStateObject.lastIntent) {
         const requiredSlots = _.filter(conversationStateObject.lastIntent.scenario.slots, (slot) => {
 
-            conversationStateObject.context[conversationStateObject.context.length - 1].slots[slot.slotName] = conversationStateObject.currentContext.slots[slot.slotName] ? conversationStateObject.currentContext.slots[slot.slotName] : '';
+            //conversationStateObject.context[conversationStateObject.context.length - 1].slots[slot.slotName] = conversationStateObject.currentContext.slots[slot.slotName] ? conversationStateObject.currentContext.slots[slot.slotName] : '';
             return slot.isRequired;
         });
         const recognizedEntities = conversationStateObject.rasaResult.entities;
@@ -406,7 +406,13 @@ module.exports = (server, conversationStateObject,  callback, followUpIntent = f
                             if (err) {
                                 return callback(err, null);
                             }
-                            return callback(response);
+                            persistContext(server, conversationStateObject, (err) => {
+
+                                if (err) {
+                                    return callback(err);
+                                }
+                                return callback(null, response);
+                            });
                         });
                     }
                 }

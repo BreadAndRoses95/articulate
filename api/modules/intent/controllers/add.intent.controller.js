@@ -51,7 +51,9 @@ module.exports = (request, reply) => {
                                     domainId = id;
                                     return cllbk(null);
                                 }
-                                if (intent.domain.indexOf("FollowUp-")>-1){
+                                if (intent.domain.indexOf("FollowUp-")>-1){ /*TODO : remove this to use intent.domain if intent.parentId > -1, require change in the way we construct
+                                    TODO: ...scenario etc.
+                                    */
                                     let domainData = {
                                         agent: intent.agent,
                                         domainName: intent.domain,

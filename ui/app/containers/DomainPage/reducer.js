@@ -15,7 +15,8 @@ const initialState = Immutable({
     enabled: true,
     intentThreshold: 50,
     extraTrainingData: false,
-    isFollowUpDomain: false
+    isFollowUpDomain: false,
+    isBlockingFollowUpDomain: true
   },
 });
 

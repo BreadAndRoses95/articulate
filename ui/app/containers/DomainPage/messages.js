@@ -66,6 +66,8 @@ export default defineMessages({
   },
   followUpDomainTooltip: {
     id :'containers.DomainPage.create_agent.followup_domain_tooltip',
-    defaultMessage: 'Follow up domains have fix name'
+    defaultMessage: 'Follow up domains have fix name',
+    isBlockingMessage: 'Blocking follow up domain',
+    isBlockingMessageTooltip: 'Block the user in the follow up domain, can especially occur when domain intent recognition threshold is high'
   }
 });

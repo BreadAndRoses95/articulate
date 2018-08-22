@@ -34,6 +34,10 @@ module.exports = (request, reply) => {
     function getTreeRecursively(id) {
         return getScenario(id, server).then(function (intent) {
             let node = {id};
+            if (!intent.followUpIntents){
+                node.children = [];
+                return Promise.resolve(node);
+            }
             return Promise.all(intent.followUpIntents.map(getTreeRecursively)).then(function (followUpIntentFound) {
                 node.children = followUpIntentFound.followUpIntents;
                 intentsToDelete.push(id);
@@ -46,7 +50,7 @@ module.exports = (request, reply) => {
             (cb) => {
                 getTreeRecursively(intentId, server).then((tree) => {
                     cb(null);
-                });
+                }).catch();
             },
             (cb) => {
                 getScenario(intentId).then((scenario) => {

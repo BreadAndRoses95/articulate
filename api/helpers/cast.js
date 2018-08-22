@@ -44,6 +44,9 @@ module.exports = (object, type) => {
             if (typeof object.extraTrainingData !== 'boolean') {
                 object.extraTrainingData = object.extraTrainingData === 'true';
             }
+            if (typeof object.isBlockingFollowUpDomain !== 'boolean') {
+                object.isBlockingFollowUpDomain = object.isBlockingFollowUpDomain === 'true'
+            }
             object.intentThreshold = parseFloat(object.intentThreshold);
             break;
         case 'entity':
