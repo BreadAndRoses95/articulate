@@ -16,7 +16,9 @@ class DomainValidate {
                     lastTraining: DomainSchema.lastTraining,
                     model: DomainSchema.model,
                     extraTrainingData: DomainSchema.extraTrainingData,
-                    isFollowUpDomain: DomainSchema.isFollowUpDomain.default(false)
+                    isFollowUpDomain: DomainSchema.isFollowUpDomain.default(false),
+                    isBlockingFollowUpDomain: DomainSchema.isBlockingFollowUpDomain.default(false)
+
                 };
             })()
         };
