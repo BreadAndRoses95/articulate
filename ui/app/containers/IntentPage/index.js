@@ -47,7 +47,7 @@ import {
   makeSelectError,
   makeSelectLoading,
   makeSelectSuccess,
-  makeSelectDomainIntents, makeSelectParentIntentId,
+  makeSelectParentIntentId,
 } from '../App/selectors';
 import {
   addSlot,
@@ -472,10 +472,6 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
       domainsSelect = [defaultOption, ...options];
     }
 
-    const intentFollowupOptions = [];
-    this.props.domainIntents.intents.map((intent) => {
-      intentFollowupOptions.push({value: intent.intentName, label: intent.intentName});
-    });
 
     let breadcrumbs = [];
     if (currentAgent) {
@@ -922,10 +918,6 @@ IntentPage.propTypes = {
   setWindowSelection: React.PropTypes.func,
   onEditMode: React.PropTypes.func,
   onChangeAgentOfSlot: React.PropTypes.func,
-  domainIntents: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
   parentIntentId: React.PropTypes.oneOfType([
     React.PropTypes.number,
     React.PropTypes.bool,
@@ -1073,7 +1065,6 @@ const mapStateToProps = createStructuredSelector({
   agentEntities: makeSelectAgentEntities(),
   currentAgent: makeSelectCurrentAgent(),
   postFormat: makeSelectPostFormatData(),
-  domainIntents: makeSelectDomainIntents(),
   parentIntentId: makeSelectParentIntentId()
 });
 

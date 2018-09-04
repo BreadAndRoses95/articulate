@@ -109,8 +109,11 @@ export function* getAgentIntents(payload) {
       limit,
       filter
     });
-    const intents = response.obj;
-    yield put(loadAgentIntentsSuccess(intents));
+    let intents = response.obj;
+   let filteredIntents = intents.intents.filter((intent)=>{
+      return intent.domain.indexOf("FollowUp-") === -1;
+    })
+    yield put(loadAgentIntentsSuccess({intents: filteredIntents, total: filteredIntents.length}));
   } catch (err) {
     const errObject = {err};
     if (errObject.err && errObject.err.message === 'Failed to fetch') {

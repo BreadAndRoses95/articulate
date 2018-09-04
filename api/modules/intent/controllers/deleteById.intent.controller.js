@@ -11,7 +11,6 @@ module.exports = (request, reply) => {
     const server = request.server;
     const redis = server.app.redis;
     let followUpIntents;
-    let followUpDomainToDelete = false;
 
     const getScenario = (intentId) => new Promise((resolve, reject) => {
         // let followUpIntents = [];
@@ -66,10 +65,6 @@ module.exports = (request, reply) => {
                             parentIntentScenario.followUpIntents = parentIntentScenario.followUpIntents.filter((item) => {
                                 return item !== intentId;
                             });
-                            if (parentIntentScenario.followUpIntents.length === 0) {
-                                // No more follow up intent in follow up domain
-                                followUpDomainToDelete = true;
-                            }
                             delete parentIntentScenario.id;
                             delete parentIntentScenario.agent;
                             delete parentIntentScenario.domain;
@@ -92,66 +87,6 @@ module.exports = (request, reply) => {
                         return cb(null);
                 })
             },
-            (callbackDeleteDomain) => {
-                if (!followUpDomainToDelete)
-                    return callbackDeleteDomain(null)
-                let domainId;
-                let agentId;
-
-                Async.series([
-                    (callbackGetAgent) => {
-                        redis.zscore(`agents`, parentIntentScenarioData.agent, (err, score) => {
-
-                            if (err) {
-                                const error = Boom.badImplementation(`An error occurred retrieving the agent id of the agent ${parentIntentScenarioData.agent}`);
-                                return callbackGetAgent(error);
-                            }
-                            agentId = score;
-                            return callbackGetAgent(null);
-                        });
-                    },
-                    (callbackGetDomain) => {
-
-                        redis.zscore(`agentDomains:${agentId}`, 'FollowUp-' + parentIntentId, (err, score) => {
-
-                            if (err) {
-                                const error = Boom.badImplementation(`An error occurred retrieving the id of the domain ${'FollowUp-' + parentIntentId}`);
-                                return callbackGetDomain(error);
-                            }
-                            domainId = score;
-                            return callbackGetDomain(null);
-                        });
-                    },
-                    (cb) => {
-                        let options = {
-                            method: 'DELETE',
-                            url: `/domain/${domainId}`,
-                        }
-                        server.inject(options, (res) => {
-                            if (res.statusCode !== 200) {
-                                if (res.statusCode === 404) {
-                                    const errorNotFound = Boom.notFound('The specified domain doesn\'t exists');
-                                    return cb(errorNotFound);
-                                }
-                                const error = Boom.create(res.statusCode, `An error occurred deleting the domain ${'FollowUp-' + parentIntentId}`);
-                                return cb(error, null);
-
-                            }
-                            return cb(null);
-                        });
-                    }], (err, result) => {
-                    if (err) {
-                        return callbackDeleteDomain(err);
-                    }
-                    else {
-                        //domain has been deleted since last follow up intent has been deleted
-                        intentsToDelete = [];
-                        return callbackDeleteDomain(null);
-                    }
-                })
-
-            },
-
             (cb) => {
                 if (intentsToDelete.length === 0)
                     return cb(null,{message:'successful operation'})

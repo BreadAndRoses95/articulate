@@ -77,6 +77,7 @@ class IntentsTable extends React.Component { // eslint-disable-line react/prefer
             onCellChange={onCellChange}
             menu={menu}
             tableName={'Intents'}
+            onSelectFollowUpIntents ={this.props.onSelectFollowUpIntents}
           />
         </div>
       </div>
@@ -87,9 +88,11 @@ class IntentsTable extends React.Component { // eslint-disable-line react/prefer
 IntentsTable.propTypes = {
   data: React.PropTypes.object,
   menu: React.PropTypes.array,
+  menuFollowUp: React.PropTypes.array,
   onCellChange: React.PropTypes.func,
   onReloadData: React.PropTypes.func,
   defaultPageSize: React.PropTypes.number,
+  onSelectFollowUpIntents: React.PropTypes.func
 };
 
 IntentsTable.defaultProps = {

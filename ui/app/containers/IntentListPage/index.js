@@ -133,6 +133,10 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
 
   onDelete() {
     const {intentToDelete, selectedDomain} = this.state;
+    if (intentToDelete.parentIntent > -1 && this.props.domainIntents.total === 1){
+      this.onSelectDomain({target:{value:'default'}});
+      this.props.onDeleteIntent(intentToDelete,  this.props.currentAgent , 'agent');
+    }
     this.props.onDeleteIntent(intentToDelete, selectedDomain ? selectedDomain : this.props.currentAgent, selectedDomain ? 'domain' : 'agent');
     this.onDeleteDismiss();
   }
@@ -233,6 +237,7 @@ export class IntentListPage extends React.PureComponent { // eslint-disable-line
               <IntentsTable
                 data={domainIntents || {intents: [], total: 0}}
                 menu={this.renderMenu()}
+                onSelectFollowUpIntents={this.onSelectDomain}
                 onReloadData={this.props.onReloadData.bind(null, this.state.selectedDomain ? this.state.selectedDomain.id : null, currentAgent ? currentAgent.id : 0)}
                 onCellChange={() => {
                 }}
@@ -277,7 +282,7 @@ IntentListPage.propTypes = {
 };
 
 export function mapDispatchToProps(dispatch) {
-  return {
+    return {
     onReset() {
       dispatch(resetAgentDomains());
       dispatch(resetDomainIntents());

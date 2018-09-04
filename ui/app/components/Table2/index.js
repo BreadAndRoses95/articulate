@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
-import { Icon } from 'react-materialize';
+import {Icon} from 'react-materialize';
 import ReactTable from 'react-table';
 import Table2Cell from '../Table2Cell';
 import MenuCell from '../Table2Cell/types/MenuCell';
@@ -15,7 +15,7 @@ class Table2 extends React.Component { // eslint-disable-line react/prefer-state
   }
 
   generateColumnDefinition(column) {
-    const { onCellChange } = this.props;
+    const {onCellChange} = this.props;
     const header = (<div>
       {column.label}
       {
@@ -75,6 +75,7 @@ class Table2 extends React.Component { // eslint-disable-line react/prefer-state
       showSearchInput,
       showPagination,
       defaultPageSize,
+      onSelectFollowUpIntents,
       ...other,
     } = this.props;
     let newColumns;
@@ -97,6 +98,24 @@ class Table2 extends React.Component { // eslint-disable-line react/prefer-state
     } else {
       newColumns = columns;
     }
+    const onRowClick = (state, rowInfo, column, instance) => {
+      return {
+        onClick: e => {
+          if (column.id === 'FollowUpIntents') {
+            if (rowInfo.original.followUpDomainId) {
+              this.props.onSelectFollowUpIntents({target: {value: rowInfo.original.followUpDomainId}})
+            }
+            console.log(rowInfo.original.parentDomainId)
+            if (rowInfo.original.parentDomainId && rowInfo.original.followUpDomainId === undefined) {
+              console.log(rowInfo.original.parentDomainId);
+              this.props.onSelectFollowUpIntents({target: {value: rowInfo.original.parentDomainId}})
+            }
+            //console.log(rowInfo.original.parentDomainId, rowInfo.original.followUpDomainId)
+          }
+        }
+      }
+    }
+
     return (
       <ReactTable
         data={this.props.data}
@@ -104,7 +123,9 @@ class Table2 extends React.Component { // eslint-disable-line react/prefer-state
         defaultPageSize={defaultPageSize}
         className={classNames.join(' ')}
         showPagination={showPagination}
+        getTdProps={onRowClick}
         {...other}
+
       />
     );
   }
@@ -123,6 +144,8 @@ Table2.propTypes = {
   pivotBy: React.PropTypes.array,
   SubComponent: React.PropTypes.func,
   defaultPageSize: React.PropTypes.number,
+  onClick: React.PropTypes.func,
+  onSelectFollowUpIntents: React.PropTypes.func
 };
 
 Table2.defaultProps = {
@@ -131,6 +154,7 @@ Table2.defaultProps = {
   striped: false,
   showPagination: true,
   showSearchInput: true,
-  pivotBy: []
+  pivotBy: [],
+  onClick: null
 };
 export default Table2;

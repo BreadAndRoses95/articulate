@@ -30,5 +30,20 @@ export default [{
   accessor: row => row.examples.length,
   pivot: true,
   headerClassName: 'table2-header',
-  cellClassName: 'text-align-center table2-column',
-}];
+  cellClassName: 'text-align-center table2-column'}
+,{
+  label: 'Follow Up Intents',
+  id: 'FollowUpIntents',
+  tooltip: '',
+  type: 'link',
+  accessor: row => {
+    let path = '/intents';
+    if (row.followUpDomainId !== undefined)
+      path += `?domainId=`+  row.followUpDomainId
+    if (row.followUpDomainId === undefined && row.parentDomainId !== undefined)
+      path += `?domainId=`+  row.parentDomainId
+    return {label : row.followUpIntents.length > 0 ? row.followUpIntents.length : 'Parent domain', path, columnName: 'followUpName'}},
+  headerClassName: 'table2-header',
+  cellClassName: 'text-align-center table2-column'
+}
+];
