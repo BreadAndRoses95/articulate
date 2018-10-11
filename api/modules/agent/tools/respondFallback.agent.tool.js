@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (conversationStateObject, callback) => {
-    if (conversationStateObject.domain.isFollowUpDomain){
+    if (conversationStateObject.domain){
         if (!conversationStateObject.domain.isBlockingFollowUpDomain){
             conversationStateObject.currentContext.followUpIntents = [];
         }

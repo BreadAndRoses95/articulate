@@ -43,22 +43,24 @@ const getEntitiesFromRasaResults = (conversationStateObject) => {
 const getBestRasaResult = (conversationStateObject) => {
 
     let rasaResult = {};
-    const normalDomainsName = conversationStateObject.agent.domains.map((domain)=>{
-        if (!domain.isFollowUpDomain){
+    const normalDomainsName = conversationStateObject.agent.domains.map((domain) => {
+        if (!domain.isFollowUpDomain) {
             return domain.domainName;
         }
-    }).filter((domainName)=>{return domainName;});
+    }).filter((domainName) => {
+        return domainName;
+    });
 
-    if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length >0){
+    if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length > 0) {
         //let's keep follow up domain parse only
-        conversationStateObject.parse = conversationStateObject.parse.filter((domainParsed)=>{
+        conversationStateObject.parse = conversationStateObject.parse.filter((domainParsed) => {
             return domainParsed.domain === 'FollowUp-' + conversationStateObject.lastIntent.id;
         })
         rasaResult.entities = getEntitiesFromRasaResults(conversationStateObject); //TODO: could change this to keep track of domain on ID only and allow renaming
     }
     else {
         // Not in follow up case, keep only the normal domains.
-        conversationStateObject.parse = conversationStateObject.parse.filter((domainParsed)=>{
+        conversationStateObject.parse = conversationStateObject.parse.filter((domainParsed) => {
             return normalDomainsName.indexOf(domainParsed.domain) > -1;
         })
     }
@@ -136,7 +138,7 @@ const getIntentData = (conversationStateObject) => {
             // }
             //should not be able to 
             const intent = _.filter(agentIntents, (agentIntent) => {
-                return agentIntent.intentName === conversationStateObject.rasaResult.intent.name ;
+                return agentIntent.intentName === conversationStateObject.rasaResult.intent.name;
             })[0];
             return intent;
         }
@@ -226,14 +228,14 @@ const persistContext = (server, conversationStateObject, cb) => {
 
     Async.map(conversationStateObject.context, (elementInContext, callbackInsertInContext) => {
 
-        if (elementInContext.id ) {
+        if (elementInContext.id) {
             if (elementInContext.slots || elementInContext.followUpIntents) {
                 const options = {
                     url: `/context/${conversationStateObject.sessionId}/${elementInContext.id}`,
                     method: 'PUT',
                     payload: {
                         slots: elementInContext.slots,
-                        followUpIntents : elementInContext.followUpIntents
+                        followUpIntents: elementInContext.followUpIntents
                     }
                 };
 
@@ -279,14 +281,14 @@ const persistContext = (server, conversationStateObject, cb) => {
     });
 };
 
-module.exports = (server, conversationStateObject,  callback, followUpIntent = false) => {
+module.exports = (server, conversationStateObject, callback, followUpIntent = false) => {
     var isActionIncomplete = false;
 
     conversationStateObject.currentContext = getCurrentContext(conversationStateObject);
     conversationStateObject.lastIntent = getPreviousIntentData(conversationStateObject);
+    conversationStateObject.actionIncomplete = true;
     if (conversationStateObject.parse) {
         conversationStateObject.rasaResult = getBestRasaResult(conversationStateObject);
-
         isActionIncomplete = findIsActionIncomplete(conversationStateObject);
 
         // If last action was complete : we just moved from one intent to the same/another
@@ -320,8 +322,8 @@ module.exports = (server, conversationStateObject,  callback, followUpIntent = f
             if (conversationStateObject.intent && conversationStateObject.scenario && conversationStateObject.domain && conversationStateObject.rasaResult.intent.confidence > conversationStateObject.domain.intentThreshold) {
                 if (!conversationStateObject.currentContext || (conversationStateObject.rasaResult.intent.name !== conversationStateObject.currentContext.name)) {
                     let slots = {};
-                    if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length > 0){
-                        slots = Object.assign(slots,conversationStateObject.currentContext.slots);
+                    if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length > 0) {
+                        slots = Object.assign(slots, conversationStateObject.currentContext.slots);
                     }
                     conversationStateObject.context.push({
                         name: conversationStateObject.rasaResult.intent.name,

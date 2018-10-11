@@ -121,12 +121,20 @@ module.exports = (request, reply) => {
             usedPostFormatIntent = false;
             postFormatPayloadToUse = conversationStateObject.agent.postFormat.postFormatPayload;
         }
+        const initPayload = {
+            textResponse: data.textResponse,
+            actionIncomplete: conversationStateObject.actionIncomplete,
+            intent: conversationStateObject.intent
+        }
+        if (conversationStateObject.scenario.action !== null && conversationStateObject.scenario.action !== ""){
+            Object.assign(initPayload, {action: conversationStateObject.scenario.action})
+        }
+
         if (postFormatPayloadToUse) {
             try {
                 const compiledPostFormat = Handlebars.compile(postFormatPayloadToUse);
-                const processedPostFormat = compiledPostFormat(Object.assign(conversationStateObject, { textResponse: data.textResponse }));
-                let processedPostFormatJson = {};
-                processedPostFormatJson = JSON.parse(processedPostFormat);
+                const processedPostFormat = compiledPostFormat(Object.assign(conversationStateObject, initPayload));
+                let processedPostFormatJson = JSON.parse(processedPostFormat);
                 if (!processedPostFormatJson.textResponse) {
                     processedPostFormatJson.textResponse = data.textResponse;
                 }
@@ -135,16 +143,15 @@ module.exports = (request, reply) => {
             catch (error) {
                 const errorMessage = usedPostFormatIntent ? 'Error formatting the post response using intent POST format : ' : 'Error formatting the post response using agent POST format : ';
                 console.log(errorMessage, error);
-                return reply({
-                    textResponse: data.textResponse,
+                return reply(Object.assign(initPayload,{
                     postFormating: errorMessage + error
-                });
+                }));
             }
 
         }
 
         else {
-            return reply({ textResponse: data.textResponse });
+            return reply(Object.assign(initPayload,{ textResponse: data.textResponse }));
         }
 
 

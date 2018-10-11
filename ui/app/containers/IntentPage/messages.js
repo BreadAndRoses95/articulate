@@ -46,6 +46,14 @@ export default defineMessages({
     id: 'containers.IntentPage.create_intent.intent_name_placeholder',
     defaultMessage: 'Type a name here',
   },
+  actionName: {
+    id: 'containers.IntentPage.create_intent.actionName',
+    defaultMessage: 'Action Name',
+  },
+  actionNamePlaceholder: {
+    id: 'containers.IntentPage.create_intent.action_name_placeholder',
+    defaultMessage: 'Type a name for your action here',
+  },
   userSaysTitle: {
     id: 'containers.IntentPage.create_intent.user_says',
     defaultMessage: 'User Says',

@@ -1,0 +1,41 @@
+version: '3.0'
+
+services:
+  api:
+    image: samtecspg/articulate-api:repo-head
+    ports: ['0.0.0.0:7500:7500', '0.0.0.0:5828:5828']
+    
+    entrypoint: ['node', '--debug','start.js']
+    environment:
+     - SWAGGER_BASE_PATH
+  ui:
+    image: samtecspg/articulate-ui:repo-head
+    ports: ['0.0.0.0:3000:3000']
+    
+    environment:
+     - API_URL
+  rasa:
+    image: samtecspg/articulate-rasa:repo-head
+    ports: ['0.0.0.0:5000:5000']
+    volumes: ["${MODEL_DIR:-./local-storage/rasa/nlu-model}:/app/projects", "${RASA_CONFIG:-./local-storage/rasa/rasa-config.yml}:/app/config.yml", "./local-storage/rasa/logs:/app/logs"]
+    
+  duckling:
+    image: samtecspg/duckling:0.1.6.0
+    ports: ['0.0.0.0:8000:8000']
+    
+  redis:
+    image: redis:4.0.6-alpine
+    ports: ['0.0.0.0:6379:6379']
+    
+    command: redis-server --appendonly yes
+    volumes:
+      - ${REDIS_DATA:-./local-storage/redis-data}:/data
+  node-red:
+    image: nodered/node-red-docker
+    ports: ['0.0.0.0:1880:1880']
+    
+
+networks:
+  default:
+    external:
+      name: bot_net

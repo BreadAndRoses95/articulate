@@ -25,6 +25,9 @@ module.exports = (conversationStateObject, callback) => {
     if(conversationStateObject.scenario.followUpIntents && conversationStateObject.scenario.followUpIntents.length > 0) {
         conversationStateObject.currentContext = Object.assign(conversationStateObject.currentContext,{followUpIntents:conversationStateObject.scenario.followUpIntents});
     }
+    if (!conversationStateObject.scenario.followUpIntents || (conversationStateObject.scenario.followUpIntents &&conversationStateObject.scenario.followUpIntents.length === 0)) {
+        conversationStateObject.actionIncomplete = false;
+    }
     if (conversationStateObject.intent.useWebhook || conversationStateObject.agent.useWebhook) {
         const webhookToUse = conversationStateObject.intent.useWebhook ? conversationStateObject.intent.webhook : conversationStateObject.agent.webhook;
         CallWebhook(webhookToUse, conversationStateObject, (webhookResponse) => {

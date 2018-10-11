@@ -54,7 +54,8 @@ const initialState = Immutable({
     intentResponses: [],
     isBlockingIntent: false,
     followUpIntents: [],
-    parentIntent: -1
+    parentIntent: -1,
+    action: ''
   },
   webhookData: {
     agent: null,
@@ -148,7 +149,12 @@ function intentReducer(state = initialState, action) {
           .setIn(['intentData', action.payload.field], action.payload.value)
           .setIn(['postFormatData', 'intent'], action.payload.value)
           .set('touched', true);
-      } else {
+      }
+      else if (action.payload.field === 'action') {
+        return state
+          .setIn(['scenarioData','action'], action.payload.value);
+      }
+      else {
         return state
           .updateIn(['webhookData'], (scenarioData) => scenarioData.set(action.payload.field, (action.payload.field === 'agent' ? action.payload.value.split('~')[1] : action.payload.value)))
           .updateIn(['scenarioData'], (scenarioData) => scenarioData.set(action.payload.field, (action.payload.field === 'agent' ? action.payload.value.split('~')[1] : action.payload.value)))

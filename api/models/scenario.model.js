@@ -15,7 +15,8 @@ class ScenarioModel {
             intentResponses: Joi.array().items(Joi.string().trim()),
             followUpIntents : Joi.array().items(Joi.number().integer().min(0)),
             isBlockingIntent : Joi.boolean(),
-            parentIntent: Joi.number().integer()
+            parentIntent: Joi.number().integer(),
+            action: Joi.string().trim().allow('')
         };
     };
 }
