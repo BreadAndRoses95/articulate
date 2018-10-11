@@ -303,7 +303,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
     if (this.state.entityTagged) {
       this.setState({
         entityTagged: false,
-        userExamplesShown: this.props.intent.examples.slice(this.state.userExamplesPage, this.props.defaultUserExamplesPageSize)
+        userExamplesShown: this.props.intent.examples.slice(this.state.userExamplesPage * this.props.defaultUserExamplesPageSize, this.state.userExamplesPage * this.props.defaultUserExamplesPageSize + this.props.defaultUserExamplesPageSize),
       });
     }
     if (this.state.findNewSysEntities) {
@@ -539,6 +539,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                 value={intent.intentName}
                 onChange={(evt) => this.onChangeInput(evt, 'intentName')}
                 required
+                disabled = {this.state.editMode}
               />
               <FormTextInput
                 label={messages.userSaysTitle}
@@ -577,8 +578,7 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                     />
                   </Table>
                 </TableContainer> :
-                <TableContainer id="userSayingsTable" quotes tableStyle={{marginBottom: '0px'}}
-                                style={{backgroundColor: '#c5cbd8'}}>
+                <TableContainer id="userSayingsTable" quotes tableStyle={{ marginBottom: '0px'}} style={{ backgroundColor: '#e2e5ee' }} >
                   <Table>
                     <tbody>
                     <tr style={{width: '100%'}}>
@@ -731,8 +731,8 @@ export class IntentPage extends React.PureComponent { // eslint-disable-line rea
                 />
               </Table>
             </TableContainer> :
-            <TableContainer id="intentResponsesTable" style={{backgroundColor: '#c5cbd8'}} quotes>
-              <Table>
+            <TableContainer id="intentResponsesTable" style={{ backgroundColor: '#c5cbd8' }} quotes>
+              <Table>            
                 <tbody>
                 <tr style={{width: '100%'}}>
                   <td style={{width: '100%', display: 'inline-block'}}>

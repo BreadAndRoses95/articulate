@@ -23,6 +23,7 @@ import {
   updateScenarioError,
   updateScenarioSuccess,
   updateWebhookError,
+  loadCurrentAgentStatus,
 } from '../App/actions';
 import {
   CREATE_INTENT,
@@ -271,8 +272,9 @@ export function* putIntent(payload) {
   const oldScenarioData = yield select(makeSelectOldScenarioData());
   try {
     if (!_.isEqual(intentData, oldIntentData)) {
-      const {id, agent, domain, ...data} = intentData;
-      const response = yield call(api.intent.putIntentId, {id, body: data});
+      const { id, agent, domain, ...data } = intentData;
+      const response = yield call(api.intent.putIntentId, { id, body: data });
+      yield call(loadCurrentAgentStatus, {id: agent.id});
     }
     yield put(updateIntentSuccess());
     if (oldScenarioData) {
