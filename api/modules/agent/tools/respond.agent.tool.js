@@ -80,8 +80,25 @@ const getBestRasaResult = (conversationStateObject) => {
         }
     }
 
-    return rasaResult;
+    return getRasaResultWithExactQueryInIntent(conversationStateObject,rasaResult);
 };
+
+const getRasaResultWithExactQueryInIntent = (conversationStateObject, rasaResult) => {
+    const domainSelected = conversationStateObject.agent.domains.filter((domain) =>  domain.domainName === rasaResult.domain)[0];
+    const intentUserSayingsWithExactUserQuery = []
+    domainSelected.intents.forEach((intent)=> {
+
+        let userSayingsWithExactQuery = intent.examples.filter((example) => example.userSays.toLowerCase() === conversationStateObject.text.toLowerCase());
+        if (userSayingsWithExactQuery.length > 0) {
+            intentUserSayingsWithExactUserQuery.push(intent);
+        }
+    });
+    if (intentUserSayingsWithExactUserQuery.length === 1) {
+        rasaResult.intent.name = intentUserSayingsWithExactUserQuery[0].intentName;
+        rasaResult.intent.confidence = 1;
+    }
+    return rasaResult;
+}
 
 const getScenarioByName = (scenarioName, conversationStateObject) => {
 
@@ -120,7 +137,7 @@ const getIntentData = (conversationStateObject) => {
 
     if (conversationStateObject.rasaResult.intent) {
         if (conversationStateObject.agent.domains) {
-            const agentIntents = _.compact(_.flatten(_.map(conversationStateObject.agent.domains, 'intents')));
+            const agentIntents = _.flatten(conversationStateObject.agent.domains.map((domain) => domain.intents));
             //This is useless since we've filtered the rasaResult
             // if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length >0){
             //     const followUpIntentsName = conversationStateObject.currentContext.followUpIntents.map((followUpIntentId) => {
