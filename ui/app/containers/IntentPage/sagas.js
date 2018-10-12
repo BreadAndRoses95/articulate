@@ -272,7 +272,7 @@ export function* putIntent(payload) {
   const oldScenarioData = yield select(makeSelectOldScenarioData());
   try {
     if (!_.isEqual(intentData, oldIntentData)) {
-      const { id, agent, domain, ...data } = intentData;
+      const { id, agent, domain, followUpDomainId, followUpIntents, parentIntent, ...data } = intentData;
       const response = yield call(api.intent.putIntentId, { id, body: data });
       yield call(loadCurrentAgentStatus, {id: agent.id});
     }

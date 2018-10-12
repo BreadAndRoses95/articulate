@@ -34,7 +34,7 @@ export default [{
 ,{
   label: 'Follow Up Intents',
   id: 'FollowUpIntents',
-  tooltip: '',
+  tooltip: 'Click on this column to navigate to follow up intents',
   type: 'link',
   accessor: row => {
     let path = '/intents';

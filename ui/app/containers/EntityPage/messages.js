@@ -81,7 +81,7 @@ export default defineMessages({
   valueColumnTooltip: {
     id: 'containers.EntityPage.create_agent.value_column_tooltip',
     defaultMessage: 'An instance of the intent you named upwards',
-    regexMessage: 'A regex to be matched (resolved value found in text will be set in slots.[entityName].original while its corresponding entity entry will be saved as slots.[entityName].value)',
+    regexMessage: 'A regex to be matched (resolved value (last group if regex use group ) found in text will be set in slots.[entityName].original while its corresponding entity entry will be saved as slots.[entityName].value)'
   },
   synonymsColumTooltip: {
     id: 'containers.EntityPage.create_agent.synonyms_colum_tooltip',
