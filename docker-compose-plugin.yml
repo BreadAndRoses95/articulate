@@ -30,9 +30,6 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - ${REDIS_DATA:-./local-storage/redis-data}:/data
-  node-red:
-    image: nodered/node-red-docker
-    ports: ['0.0.0.0:1880:1880']
     
 
 networks:
