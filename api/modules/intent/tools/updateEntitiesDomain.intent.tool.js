@@ -6,6 +6,7 @@ const Boom = require('boom');
 const extractEntities = (examples) => {
 
     //Only system entities have an extractor specified, so ignore sys entities
+    //todo CHANGE THIS TO CONSIDER REGEX ENTITIES !!
     const entities = _.compact(_.uniq(_.flatten(_.map(_.filter(_.flatten(_.map(examples, 'entities')), (entity) => {
 
         return !entity.extractor;

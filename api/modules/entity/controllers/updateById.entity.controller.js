@@ -9,27 +9,27 @@ const Status = require('../../../helpers/status.json');
 
 const updateDataFunction = (redis, entityId, currentEntity, updateData, cb) => {
 
-    if (updateData.examples){
+    if (updateData.examples) {
         currentEntity.examples = updateData.examples;
     }
     const flatEntity = Flat(currentEntity);
     const flatUpdateData = Flat(updateData);
-    Object.keys(flatUpdateData).forEach( (key) => {
+    Object.keys(flatUpdateData).forEach((key) => {
 
         flatEntity[key] = flatUpdateData[key];
     });
-    if (flatEntity.regex === null){
+    if (flatEntity.regex === null) {
         flatEntity.regex = '';
     }
     redis.del(`entity:${entityId}`, (err) => {
 
-        if (err){
+        if (err) {
             const error = Boom.badImplementation('An error occurred temporaly removing the entity for the update.');
             return cb(error);
         }
         redis.hmset(`entity:${entityId}`, RemoveBlankArray(flatEntity), (err) => {
 
-            if (err){
+            if (err) {
                 const error = Boom.badImplementation('An error occurred adding the entity data.');
                 return cb(error);
             }
@@ -39,6 +39,31 @@ const updateDataFunction = (redis, entityId, currentEntity, updateData, cb) => {
 };
 
 module.exports = (request, reply) => {
+
+    const findDomainsIdContainingEntity = function (agent) {
+        let domainContainingEntity = agent.domains.filter((domain) => domain.intents.filter((intent) => findSlotInIntentContainingEntity(intent)).length > 0);
+        return domainContainingEntity.map(domain => String(domain.id));
+    }
+
+    const getAgent = (agentId) => new Promise((resolve, reject) => {
+        server.inject(`/agent/${agentId}/export?withReferences=true`, (res) => {
+            (res) => {
+
+            }
+            if (res.statusCode !== 200) {
+                if (res.statusCode === 404) {
+                    const error = Boom.notFound('The specified agent doesn\'t exists');
+                }
+                const error = Boom.create(res.statusCode, `An error occurred getting the data of the agent ${agentId}`);
+                return reject(error);
+            }
+            return resolve(res.result);
+        });
+    });
+
+    const findSlotInIntentContainingEntity = function (intent) {
+        return intent.scenario.slots.filter((slot) => slot.entity === oldEntityName).length > 0;
+    }
 
     let agentId = null;
     let oldEntityName = null;
@@ -51,7 +76,7 @@ module.exports = (request, reply) => {
     const server = request.server;
     const redis = server.app.redis;
 
-    if (updateData.entityName && updateData.entityName.startsWith('sys.')){
+    if (updateData.entityName && updateData.entityName.startsWith('sys.')) {
         const error = Boom.badRequest('\'sys.\' is a reserved prefix for system entities. Please use another entity name');
         return reply(error, null);
     }
@@ -60,8 +85,8 @@ module.exports = (request, reply) => {
 
             server.inject(`/entity/${entityId}`, (res) => {
 
-                if (res.statusCode !== 200){
-                    if (res.statusCode === 404){
+                if (res.statusCode !== 200) {
+                    if (res.statusCode === 404) {
                         const error = Boom.notFound('The specified entity doesn\'t exists');
                         return cb(error, null);
                     }
@@ -75,11 +100,11 @@ module.exports = (request, reply) => {
 
             redis.zscore('agents', currentEntity.agent, (err, id) => {
 
-                if (err){
+                if (err) {
                     const error = Boom.badImplementation('An error occurred checking if the agent exists.');
                     return callback(error);
                 }
-                if (id){
+                if (id) {
                     agentId = id;
                     return callback(null, currentEntity);
                 }
@@ -90,7 +115,7 @@ module.exports = (request, reply) => {
         (currentEntity, cb) => {
 
             const requiresNameChanges = (updateData.entityName && updateData.entityName !== currentEntity.entityName);
-            if (requiresNameChanges){
+            if (requiresNameChanges) {
                 oldEntityName = currentEntity.entityName;
                 newEntityName = updateData.entityName;
                 requiresNameUpdate = true;
@@ -99,11 +124,11 @@ module.exports = (request, reply) => {
 
                         redis.zadd(`agentEntities:${agentId}`, 'NX', entityId, updateData.entityName, (err, addResponse) => {
 
-                            if (err){
+                            if (err) {
                                 const error = Boom.badImplementation(`An error occurred adding the name ${updateData.entityName} to the entities list of the agent ${currentEntity.agent}.`);
                                 return callback(error);
                             }
-                            if (addResponse !== 0){
+                            if (addResponse !== 0) {
                                 return callback(null);
                             }
                             const error = Boom.badRequest(`A entity with this name already exists in the agent ${currentEntity.agent}.`);
@@ -114,8 +139,8 @@ module.exports = (request, reply) => {
 
                         redis.zrem(`agentEntities:${agentId}`, currentEntity.entityName, (err, removeResult) => {
 
-                            if (err){
-                                const error = Boom.badImplementation( `An error occurred removing the name ${currentEntity.entityName} from the entities list of the agent ${currentEntity.agent}.`);
+                            if (err) {
+                                const error = Boom.badImplementation(`An error occurred removing the name ${currentEntity.entityName} from the entities list of the agent ${currentEntity.agent}.`);
                                 return callback(error);
                             }
                             return callback(null);
@@ -125,7 +150,7 @@ module.exports = (request, reply) => {
 
                         updateDataFunction(redis, entityId, currentEntity, updateData, (err, result) => {
 
-                            if (err){
+                            if (err) {
                                 const error = Boom.badImplementation('An error occurred adding the entity data.');
                                 return callback(error);
                             }
@@ -134,17 +159,17 @@ module.exports = (request, reply) => {
                     }
                 ], (err, result) => {
 
-                    if (err){
+                    if (err) {
                         return cb(err);
                     }
                     return cb(null, result);
                 });
             }
             else {
-                if (updateData.examples){
+                if (updateData.examples) {
                     const oldValues = _.map(currentEntity.examples, ('value')).sort();
                     const newValues = _.map(updateData.examples, ('value')).sort();
-                    if (!_.isEqual(oldValues, newValues)){
+                    if (!_.isEqual(oldValues, newValues)) {
                         requiresRetrain = true;
                     }
                     else {
@@ -155,7 +180,7 @@ module.exports = (request, reply) => {
                                 return example.value === currentExample.value;
                             });
                             const isTheSame = _.isEqual(example.synonyms.sort(), currentExistingExample.synonyms.sort());
-                            if (!isTheSame){
+                            if (!isTheSame) {
                                 return true;
                             }
                             return false;
@@ -164,7 +189,7 @@ module.exports = (request, reply) => {
                 }
                 updateDataFunction(redis, entityId, currentEntity, updateData, (err, result) => {
 
-                    if (err){
+                    if (err) {
                         const error = Boom.badImplementation('An error occurred adding the entity data.');
                         return cb(error);
                     }
@@ -174,7 +199,7 @@ module.exports = (request, reply) => {
         }
     ], (err, updatedEntity) => {
 
-        if (err){
+        if (err) {
             return reply(err, null);
         }
 
@@ -184,16 +209,28 @@ module.exports = (request, reply) => {
                 (callbackGetDomainsUsingEntity) => {
 
                     redis.smembers(`entityDomain:${updatedEntity.id}`, (err, domainsUsingEntity) => {
+                            getAgent(agentId).then(agent => {
+                                let domainsFoundWithRegexEntity = findDomainsIdContainingEntity(agent)
+                                domainsUsingEntity.push.apply(domainsUsingEntity, domainsFoundWithRegexEntity);
+                                domainsUsingEntity = _.uniq(domainsUsingEntity);
+                                if (err) {
+                                    const error = Boom.badImplementation(`An error occurred getting the domains used by the entity ${updatedEntity.entityName}`);
+                                    return callbackGetDomainsUsingEntity(error);
+                                }
 
-                        if (err){
-                            const error = Boom.badImplementation(`An error occurred getting the domains used by the entity ${updatedEntity.entityName}`);
-                            return callbackGetDomainsUsingEntity(error);
+                                if (domainsUsingEntity && domainsUsingEntity.length > 0) {
+                                    return callbackGetDomainsUsingEntity(null, domainsUsingEntity);
+                                }
+                                return reply(updatedEntity);
+                            }).catch((error) => {
+                                if (err) {
+                                    const error = Boom.badImplementation(`An error occurred getting the domains used by the entity ${updatedEntity.entityName}`);
+                                    return callbackGetDomainsUsingEntity(error);
+                                }
+                            })
                         }
-                        if (domainsUsingEntity && domainsUsingEntity.length > 0){
-                            return callbackGetDomainsUsingEntity(null, domainsUsingEntity);
-                        }
-                        return reply(updatedEntity);
-                    });
+                    );
+
                 },
                 (domainsUsingEntity, callbackUpdateEachDomainIntents) => {
 
@@ -202,9 +239,9 @@ module.exports = (request, reply) => {
                         Async.waterfall([
                             (callbackSetDomainOutOfDate) => {
 
-                                redis.hmset(`domain:${domain}`, { status: Status.outOfDate }, (err) => {
+                                redis.hmset(`domain:${domain}`, {status: Status.outOfDate}, (err) => {
 
-                                    if (err){
+                                    if (err) {
                                         const error = Boom.badImplementation(`An error occurred updating the domain ${domain} status.`);
                                         return callbackSetDomainOutOfDate(error);
                                     }
@@ -215,7 +252,7 @@ module.exports = (request, reply) => {
 
                                 server.inject(`/domain/${domain}/intent`, (res) => {
 
-                                    if (res.statusCode !== 200){
+                                    if (res.statusCode !== 200) {
                                         const error = Boom.create(res.statusCode, `An error occurred getting the intents to update of the domain ${domain}`);
                                         return callbackGetIntentsOfDomain(error, null);
                                     }
@@ -234,16 +271,16 @@ module.exports = (request, reply) => {
 
                                                 example.entities.forEach((entityInExample) => {
 
-                                                    if (entityInExample.entity === oldEntityName){
+                                                    if (entityInExample.entity === oldEntityName) {
                                                         updateIntent = true;
                                                         entityInExample.entity = newEntityName;
                                                     }
                                                 });
                                             });
-                                            if (updateIntent){
+                                            if (updateIntent) {
                                                 redis.hmset(`intent:${intent.id}`, RemoveBlankArray(Flat(intent)), (err, result) => {
 
-                                                    if (err){
+                                                    if (err) {
                                                         const error = Boom.badImplementation(`An error occurred updating the intent ${intent.id} with the new values of the entity`);
                                                         return callbackUpdateIntent(error, null);
                                                     }
@@ -261,8 +298,8 @@ module.exports = (request, reply) => {
 
                                                     server.inject(`/intent/${intent.id}/scenario`, (res) => {
 
-                                                        if (res.statusCode !== 200){
-                                                            if (res.statusCode === 404){
+                                                        if (res.statusCode !== 200) {
+                                                            if (res.statusCode === 404) {
                                                                 return callbackGetScenario(null, null);
                                                             }
                                                             const error = Boom.create(res.statusCode, `An error occurred getting the data of the scenario ${intent.id}`);
@@ -273,20 +310,20 @@ module.exports = (request, reply) => {
                                                 },
                                                 (currentScenario, callbackUpdateScenarioSlots) => {
 
-                                                    if (currentScenario){
+                                                    if (currentScenario) {
                                                         let updateScenario = false;
                                                         currentScenario.slots = _.map(currentScenario.slots, (slot) => {
 
-                                                            if (slot.entity === oldEntityName){
+                                                            if (slot.entity === oldEntityName) {
                                                                 updateScenario = true;
                                                                 slot.entity = newEntityName;
                                                             }
                                                             return slot;
                                                         });
-                                                        if (updateScenario){
+                                                        if (updateScenario) {
                                                             redis.hmset(`scenario:${intent.id}`, RemoveBlankArray(Flat(currentScenario)), (err, result) => {
 
-                                                                if (err){
+                                                                if (err) {
                                                                     const error = Boom.badImplementation(`An error occurred updating the scenario ${intent.id} with the new values of the entity`);
                                                                     return callbackUpdateScenarioSlots(error, null);
                                                                 }
@@ -303,7 +340,7 @@ module.exports = (request, reply) => {
                                                 }
                                             ], (err, result) => {
 
-                                                if (err){
+                                                if (err) {
                                                     return callbackUpdateScenario(err, null);
                                                 }
                                                 return callbackUpdateScenario(result);
@@ -311,14 +348,14 @@ module.exports = (request, reply) => {
                                         }
                                     ], (err, result) => {
 
-                                        if (err){
+                                        if (err) {
                                             return callbackMapOfIntent(err);
                                         }
                                         return callbackMapOfIntent(null);
                                     });
                                 }, (err, result) => {
 
-                                    if (err){
+                                    if (err) {
                                         return callbackUpdateIntentsAndScenarios(err);
                                     }
                                     return callbackUpdateIntentsAndScenarios(null);
@@ -326,14 +363,14 @@ module.exports = (request, reply) => {
                             }
                         ], (err) => {
 
-                            if (err){
+                            if (err) {
                                 return callbackMapOfDomains(err);
                             }
                             return callbackMapOfDomains(null);
                         });
                     }, (err, result) => {
 
-                        if (err){
+                        if (err) {
                             return callbackUpdateEachDomainIntents(err);
                         }
                         return callbackUpdateEachDomainIntents(null);
@@ -341,12 +378,12 @@ module.exports = (request, reply) => {
                 }
             ], (err, result) => {
 
-                if (err){
+                if (err) {
                     return reply(err);
                 }
-                redis.hmset(`agent:${agentId}`, { status: Status.outOfDate }, (err) => {
+                redis.hmset(`agent:${agentId}`, {status: Status.outOfDate}, (err) => {
 
-                    if (err){
+                    if (err) {
                         const error = Boom.badImplementation('An error occurred updating the agent status.');
                         return reply(error);
                     }
@@ -355,7 +392,7 @@ module.exports = (request, reply) => {
             });
         }
         else {
-            if (!requiresRetrain){
+            if (!requiresRetrain) {
                 return reply(Cast(updatedEntity, 'entity'));
             }
 
@@ -364,11 +401,11 @@ module.exports = (request, reply) => {
 
                     redis.smembers(`entityDomain:${updatedEntity.id}`, (err, domainsUsingEntity) => {
 
-                        if (err){
+                        if (err) {
                             const error = Boom.badImplementation(`An error occurred getting the domains used by the entity ${updatedEntity.entityName}`);
                             return callbackGetDomainsUsingEntity(error);
                         }
-                        if (domainsUsingEntity && domainsUsingEntity.length > 0){
+                        if (domainsUsingEntity && domainsUsingEntity.length > 0) {
                             return callbackGetDomainsUsingEntity(null, domainsUsingEntity);
                         }
                         return reply(updatedEntity);
@@ -378,9 +415,9 @@ module.exports = (request, reply) => {
 
                     Async.map(domainsUsingEntity, (domain, callbackMapOfDomains) => {
 
-                        redis.hmset(`domain:${domain}`, { status: Status.outOfDate }, (err) => {
+                        redis.hmset(`domain:${domain}`, {status: Status.outOfDate}, (err) => {
 
-                            if (err){
+                            if (err) {
                                 const error = Boom.badImplementation(`An error occurred updating the domain ${domain} status.`);
                                 return callbackMapOfDomains(error);
                             }
@@ -388,7 +425,7 @@ module.exports = (request, reply) => {
                         });
                     }, (err, result) => {
 
-                        if (err){
+                        if (err) {
                             return callbackUpdateEachDomainStatus(err);
                         }
                         return callbackUpdateEachDomainStatus(null);
@@ -396,12 +433,12 @@ module.exports = (request, reply) => {
                 }
             ], (err, result) => {
 
-                if (err){
+                if (err) {
                     return reply(err);
                 }
-                redis.hmset(`agent:${agentId}`, { status: Status.outOfDate }, (err) => {
+                redis.hmset(`agent:${agentId}`, {status: Status.outOfDate}, (err) => {
 
-                    if (err){
+                    if (err) {
                         const error = Boom.badImplementation('An error occurred updating the agent status.');
                         return reply(error);
                     }
