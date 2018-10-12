@@ -61,8 +61,9 @@ export function UserSayingsRows(props) {
             regexToTest = new RegExp(syn, 'ig');
             match = regexToTest.exec(textValue)
             while (match !==null) {
-              const startIndex = match.index;
-              const endIndex = startIndex + match[0].length;
+              const lastGroupMatched = match[match.length-1]
+              const startIndex = textValue.indexOf(lastGroupMatched);
+              const endIndex = startIndex + lastGroupMatched.length;
               const resultToSend = { value: match[0], entity: entityName, start: startIndex, end: endIndex };
               match = regexToTest.exec(textValue);
               if (entityIsList) {

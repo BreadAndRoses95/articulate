@@ -298,11 +298,12 @@ const parseText = (rasa, spacyPretrainedEntities, ERPipeline, ducklingService, d
 
                                         while (match) {
                                             if (foundRegex.indexOf(match) < 0) {
-                                                const startIndex = textToParse.indexOf(match[0]);
-                                                const endIndex = startIndex + match[0].length;
-                                                const resultToSend = Object.assign(regex, { resolvedRegex: match[0], entityValue, start: startIndex, end: endIndex, regexType: 'entityRegex' });
+                                                const lastGroupMatched = match[match.length-1];
+                                                const startIndex = textToParse.indexOf(lastGroupMatched);
+                                                const endIndex = startIndex + lastGroupMatched.length;
+                                                const resultToSend = Object.assign(regex, { resolvedRegex: lastGroupMatched, entityValue, start: startIndex, end: endIndex, regexType: 'entityRegex' });
                                                 results.push(_.cloneDeep(resultToSend));
-                                                foundRegex.push(match[0]);
+                                                foundRegex.push(lastGroupMatched);
                                                 match = regexToTest.exec(textToParse);
 
                                             }
