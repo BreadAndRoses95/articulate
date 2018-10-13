@@ -336,7 +336,7 @@ module.exports = (server, conversationStateObject, callback, followUpIntent = fa
         else {
             //TODO : remove this,  generic case
             conversationStateObject.domain = getDomainOfIntent(conversationStateObject);
-            if (conversationStateObject.intent && conversationStateObject.scenario && conversationStateObject.domain && conversationStateObject.rasaResult.intent.confidence > conversationStateObject.domain.intentThreshold) {
+            if (conversationStateObject.intent && conversationStateObject.scenario && conversationStateObject.domain && conversationStateObject.rasaResult.intent.confidence >= conversationStateObject.domain.intentThreshold) {
                 if (!conversationStateObject.currentContext || (conversationStateObject.rasaResult.intent.name !== conversationStateObject.currentContext.name)) {
                     let slots = {};
                     if (conversationStateObject.currentContext && conversationStateObject.currentContext.followUpIntents && conversationStateObject.currentContext.followUpIntents.length > 0) {
