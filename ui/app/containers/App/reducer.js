@@ -61,7 +61,7 @@ import {
   RESET_SESSION_SUCCESS,
   RESET_STATUS_FLAGS,
   SET_IN_WIZARD,
-  TRAIN_AGENT, 
+  TRAIN_AGENT,
   UPDATE_AGENT,
   UPDATE_AGENT_ERROR,
   UPDATE_AGENT_SUCCESS,
@@ -87,6 +87,9 @@ import {
   LOAD_SETTINGS,
   LOAD_SETTINGS_ERROR,
   LOAD_SETTINGS_SUCCESS,
+  LOGIN_REQUEST,
+  LOGIN_REQUEST_ERROR,
+  LOGIN_REQUEST_SUCCESS,
   CHANGE_SETTINGS_DATA,
   RESET_SETTINGS_DATA,
   REMOVE_SETTINGS_FALLBACK,
@@ -103,9 +106,13 @@ const initialState = Immutable({
   currentAgent: undefined,
   currentAgentStatus: undefined,
   agents: [],
-  agentDomains: { domains: [], total: 0 },
-  agentEntities: { entities: [], total: 0 },
-  domainIntents: { intents: [], total: 0 },
+  agentDomains: {domains: [], total: 0},
+  agentEntities: {entities: [], total: 0},
+  domainIntents: {intents: [], total: 0},
+  loginData: {
+    loggedIn: false,
+    token: false
+  },
   conversation: [],
   agent: undefined,
   entityIntents: {},
@@ -292,7 +299,10 @@ function appReducer(state = initialState, action) {
     case CONVERSE:
       return state
         .set('loadingConversation', true)
-        .update('conversation', (conversation) => conversation.concat({ message: action.payload.message, author: 'user' }));
+        .update('conversation', (conversation) => conversation.concat({
+          message: action.payload.message,
+          author: 'user'
+        }));
     case CONVERSE_SUCCESS:
       return state
         .set('loadingConversation', false)
@@ -536,6 +546,24 @@ function appReducer(state = initialState, action) {
     case CHANGE_SETTINGS_DATA:
       return state
         .setIn(['settingsData', action.payload.field], action.payload.value);
+    case LOGIN_REQUEST:
+      return state
+        .set('loading', true)
+    case LOGIN_REQUEST_ERROR:
+      console.log("AHHHCTION")
+      console.log(action)
+      return state
+        .set('error', action.error)
+        .set('loading', false)
+    case LOGIN_REQUEST_SUCCESS:
+      return state
+        .set('error', false)
+        .set('loading', false)
+        .set('loginData',
+          {
+            loggedIn: true,
+            token: action.token
+          })
     case RESET_SETTINGS_DATA:
       return state
         .set('settingsData', initialState.settingsData);
@@ -543,10 +571,10 @@ function appReducer(state = initialState, action) {
       return state
         .updateIn(['settingsData', 'defaultAgentFallbackResponses'], fallbackResponses => fallbackResponses.filter((item, index) => index !== action.index));
     case SET_PARENT_INTENT_ID:
-      return state.set("parentIntentId",action.parentIntent.id);
+      return state.set("parentIntentId", action.parentIntent.id);
     case RESET_PARENT_INTENT_ID:
-      return state.set("parentIntentId",-1);
-
+      return state.set("parentIntentId", -1);
+    
     default:
       return state;
   }

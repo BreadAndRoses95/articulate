@@ -38,7 +38,7 @@ function TextInput(props) { // eslint-disable-line react/prefer-stateless-functi
           onChange={props.onChange}
           onKeyDown={props.onKeyDown}
           required={props.required}
-          type="text"
+          type={props.type}
           className={props.className}
           disabled={props.disabled}
           defaultValue={props.defaultValue}
@@ -64,7 +64,8 @@ TextInput.propTypes = {
   disabled: React.PropTypes.bool,
   className: React.PropTypes.string,
   tooltip: React.PropTypes.string,
-  icon: React.PropTypes.string
+  icon: React.PropTypes.string,
+  type: React.PropTypes.string
 };
 
 export default TextInput;

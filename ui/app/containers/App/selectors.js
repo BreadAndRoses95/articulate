@@ -139,6 +139,11 @@ const makeSelectParentIntentId = () => createSelector(
   (globalState) => globalState.parentIntentId,
 );
 
+const makeSelectLoginData = () => createSelector(
+  selectGlobal,
+  (globalState) => globalState.loginData,
+);
+
 export {
   selectGlobal,
   makeSelectAgents,
@@ -164,5 +169,6 @@ export {
   makeSelectRoute,
   makeSelectEntityIntents,
   makeSelectSettingsData,
-  makeSelectParentIntentId
+  makeSelectParentIntentId,
+  makeSelectLoginData
 };

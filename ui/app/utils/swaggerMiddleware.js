@@ -1,12 +1,12 @@
 // Based on https://github.com/noh4ck/redux-swagger-client/blob/master/src/index.js
 import Swagger from 'swagger-client';
-import { MISSING_API, CHECK_API, RESET_MISSING_API } from '../containers/App/constants';
-import { resetMissingAPI, loadAgents } from '../containers/App/actions';
-import { push } from 'react-router-redux';
+import {MISSING_API, CHECK_API, RESET_MISSING_API} from '../containers/App/constants';
+import {resetMissingAPI, loadAgents} from '../containers/App/actions';
+import {push} from 'react-router-redux';
 
 export default function swaggerMiddleware(opts) {
   let api;
-  return ({ dispatch, getState }) => next => action => {
+  return ({dispatch, getState}) => next => action => {
     if (!action.apiCall) {
       return next(action);
     }
@@ -14,27 +14,38 @@ export default function swaggerMiddleware(opts) {
       const { apiCall, ...rest } = action;
       return next({ ...rest, api });
     }*/
-    return new Swagger({ ...opts })
+    return new Swagger({
+      ...opts,
+      requestInterceptor(req) {
+        req.headers.Authorization = `Bearer ${getState().global.loginData.token}`
+        return req
+      },
+      responseInterceptor(resp) {
+        if (resp.status === 401 )
+          dispatch(push('/login'))
+        return resp
+      }
+    })
       .then(result => {
-          const { apiCall, ...rest } = action;
+          const {apiCall, ...rest} = action;
           api = result.apis;
-          if (getState().global.missingAPI){
+          if (getState().global.missingAPI) {
             dispatch(resetMissingAPI());
             dispatch(loadAgents());
             dispatch(push(action.refURL));
           }
           else {
-            return next({ ...rest, api });
+            return next({...rest, api});
           }
         },
         err => {
-          if (action.type === CHECK_API){
-            return next({ type: MISSING_API });
+          if (action.type === CHECK_API) {
+            return next({type: MISSING_API});
           }
           opts.error && opts.error(err)
         }
       ).catch(err => {
-        console.error(err);
+        console.log("Error calling swagger " + err)
         opts.error && opts.error(err);
       });
   };

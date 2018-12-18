@@ -19,6 +19,7 @@ function FormTextInput(props) { // eslint-disable-line react/prefer-stateless-fu
         tooltip={props.tooltip}
         defaultValue={props.defaultValue}
         icon={props.icon}
+        type={props.type}
       />
     </div>
   );
@@ -39,10 +40,12 @@ FormTextInput.propTypes = {
   tooltip: React.PropTypes.string,
   icon: React.PropTypes.string,
   s: React.PropTypes.number,
+  type:React.PropTypes.string
 };
 
 FormTextInput.defaultProps = {
   s: 12,
+  type: "text"
 };
 
 export default FormTextInput;

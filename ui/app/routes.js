@@ -31,6 +31,15 @@ export default function createRoutes(store) {
       },
     },
     {
+      path: '/login',
+      name: 'login',
+      getComponent(nextState, cb) {
+        import('containers/LoginApiPage')
+          .then(loadModule(cb))
+          .catch(errorLoading);
+      },
+    },
+    {
       path: '/wizard/domain',
       name: 'wizardDomain',
       getComponent(nextState, cb) {

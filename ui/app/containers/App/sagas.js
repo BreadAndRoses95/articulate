@@ -1,4 +1,4 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+import {LOCATION_CHANGE,push} from 'react-router-redux';
 import {
   call,
   cancel,
@@ -14,57 +14,64 @@ import {
   loadCurrentAgentStatusSuccess,
   loadSettingsSuccess,
   loadSettingsError,
+  requestLogin,
+  requestLoginError,
+  requestLoginSuccess, loadAgentDomains,
+  loadSettings
 } from '../../containers/App/actions';
 import {
   LOAD_AGENTS,
   LOAD_CURRENT_AGENT,
   LOAD_CURRENT_AGENT_STATUS,
   TRAIN_AGENT,
-  LOAD_SETTINGS,
+  LOAD_SETTINGS, LOGIN_REQUEST,
 } from '../../containers/App/constants';
 
+import LoginService from './LoginService'
+import {loadAgents} from "./actions";
+
 export function* getAgents(payload) {
-  const { api } = payload;
+  const {api} = payload;
   try {
     const response = yield call(api.agent.getAgent);
     yield put(agentsLoaded(response.obj));
   } catch (err) {
-    const errObject = { err };
-    if (errObject.err && errObject.err.message === 'Failed to fetch'){
-      yield put(agentsLoadingError({ message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.' }));
+    const errObject = {err};
+    if (errObject.err && errObject.err.message === 'Failed to fetch') {
+      yield put(agentsLoadingError({message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.'}));
     }
     else {
-      if (errObject.err.response.obj && errObject.err.response.obj.message){
-        yield put(agentsLoadingError({ message: errObject.err.response.obj.message }));
+      if (errObject.err.response.obj && errObject.err.response.obj.message) {
+        yield put(agentsLoadingError({message: errObject.err.response.obj.message}));
       }
       else {
-        yield put(agentsLoadingError({ message: 'Unknow API error' }));
+        yield put(agentsLoadingError({message: 'Unknow API error'}));
       }
     }
   }
 }
 
-export function* loadAgents() {
- yield takeLatest(LOAD_AGENTS, getAgents);
-
+export function* loadAgentsSaga() {
+  yield takeLatest(LOAD_AGENTS, getAgents);
+  
 }
 
 export function* getCurrentAgent(payload) {
-  const { api, id } = payload;
+  const {api, id} = payload;
   try {
-    const response = yield call(api.agent.getAgentId, { id });
+    const response = yield call(api.agent.getAgentId, {id});
     yield put(loadCurrentAgentSuccess(response.obj));
   } catch (err) {
-    const errObject = { err };
-    if (errObject.err && errObject.err.message === 'Failed to fetch'){
-      yield put(loadCurrentAgentError({ message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.' }));
+    const errObject = {err};
+    if (errObject.err && errObject.err.message === 'Failed to fetch') {
+      yield put(loadCurrentAgentError({message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.'}));
     }
     else {
-      if (errObject.err.response.obj && errObject.err.response.obj.message){
-        yield put(loadCurrentAgentError({ message: errObject.err.response.obj.message }));
+      if (errObject.err.response.obj && errObject.err.response.obj.message) {
+        yield put(loadCurrentAgentError({message: errObject.err.response.obj.message}));
       }
       else {
-        yield put(loadCurrentAgentError({ message: 'Unknow API error' }));
+        yield put(loadCurrentAgentError({message: 'Unknow API error'}));
       }
     }
   }
@@ -72,22 +79,22 @@ export function* getCurrentAgent(payload) {
 
 export function* loadCurrentAgent() {
   const watcher = yield takeLatest(LOAD_CURRENT_AGENT, getCurrentAgent);
-
+  
   // Suspend execution until location changes
   yield take(LOCATION_CHANGE);
 }
 
 
 export function* getCurrentAgentStatus(payload) {
-  const { api, id } = payload;
+  const {api, id} = payload;
   try {
-    const response = yield call(api.agent.getAgentId, { id });
+    const response = yield call(api.agent.getAgentId, {id});
     yield put(loadCurrentAgentStatusSuccess({
       status: response.obj.status,
       lastTraining: response.obj.lastTraining
     }));
   } catch (err) {
-    const errObject = { err };
+    const errObject = {err};
 //     if (errObject.err && errObject.err.message === 'Failed to fetch'){
 //       console.error('Can\'t find a connection with the API. Please check your API is alive and configured properly.');
 //     }
@@ -104,22 +111,22 @@ export function* getCurrentAgentStatus(payload) {
 
 export function* loadCurrentAgentStatus() {
   const watcher = yield takeLatest(LOAD_CURRENT_AGENT_STATUS, getCurrentAgentStatus);
-
+  
   // Suspend execution until location changes
   yield take(LOCATION_CHANGE);
 }
 
 export function* getTrainAgent(payload) {
-  const { api, agentId } = payload;
+  const {api, agentId} = payload;
   try {
-    const response = yield call(api.agent.getAgentIdTrain, { id: agentId });
+    const response = yield call(api.agent.getAgentIdTrain, {id: agentId});
   } catch (err) {
-    const errObject = { err };
-    if (errObject.err && errObject.err.message === 'Failed to fetch'){
+    const errObject = {err};
+    if (errObject.err && errObject.err.message === 'Failed to fetch') {
       console.log('Can\'t find a connection with the API. Please check your API is alive and configured properly.');
     }
     else {
-      if (errObject.err.response.obj && errObject.err.response.obj.message){
+      if (errObject.err.response.obj && errObject.err.response.obj.message) {
         console.log(errObject.err.response.obj.message);
       }
       else {
@@ -131,46 +138,70 @@ export function* getTrainAgent(payload) {
 
 export function* trainAgent() {
   const watcher = yield takeLatest(TRAIN_AGENT, getTrainAgent);
-
+  
   yield take(LOCATION_CHANGE);
 }
 
 export function* getSettings(payload) {
-  const { api, id } = payload;
+  const {api, id} = payload;
   try {
     const response = yield call(api.settings.getSettings);
     const settings = response.obj;
     yield put(loadSettingsSuccess(settings));
   } catch (err) {
-    const errObject = { err };
-    if (errObject.err && errObject.err.message === 'Failed to fetch'){
-      yield put(loadSettingsError({ message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.' }));
+    const errObject = {err};
+    if (errObject.err && errObject.err.message === 'Failed to fetch') {
+      yield put(loadSettingsError({message: 'Can\'t find a connection with the API. Please check your API is alive and configured properly.'}));
     }
     else {
-      if (errObject.err.response.obj && errObject.err.response.obj.message){
-        yield put(loadSettingsError({ message: errObject.err.response.obj.message }));
+      if (errObject.err.response.obj && errObject.err.response.obj.message) {
+        yield put(loadSettingsError({message: errObject.err.response.obj.message}));
       }
       else {
-        yield put(loadSettingsError({ message: 'Unknow API error' }));
+        yield put(loadSettingsError({message: 'Unknow API error'}));
       }
     }
   }
 }
 
-export function* loadSettings() {
+export function* loadSettingsSaga() {
   const watcher = yield takeLatest(LOAD_SETTINGS, getSettings);
-
+  
   // Suspend execution until location changes
   /*yield take(LOCATION_CHANGE);
   yield cancel(watcher);*/
 }
 
+export function* loginRequest({credentials}) {
+  try {
+    const resultLoginRequest = yield call(LoginService.loginRequest, {
+      username: credentials.loginUsername,
+      password: credentials.loginPassword
+    });
+    console.log(resultLoginRequest.data)
+    yield put(requestLoginSuccess(resultLoginRequest.data.token))
+    yield put(loadAgents())
+    yield put(loadSettings())
+    yield put(push('/'))
+  }
+  catch (error) {
+    console.log(error)
+    yield put(requestLoginError({message: error.message}))
+  }
+}
+
+export function* loginRequestSaga() {
+  const watcher = yield takeLatest(LOGIN_REQUEST, loginRequest)
+  
+  yield take(LOCATION_CHANGE)
+}
 
 
 export default [
-  loadAgents,
+  loadAgentsSaga,
   loadCurrentAgent,
   loadCurrentAgentStatus,
   trainAgent,
-  loadSettings
+  loadSettingsSaga,
+  loginRequestSaga
 ];

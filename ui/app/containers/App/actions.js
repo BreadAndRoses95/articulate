@@ -93,7 +93,7 @@ import {
   RESET_SETTINGS_DATA,
   REMOVE_SETTINGS_FALLBACK,
   SET_PARENT_INTENT_ID,
-  RESET_PARENT_INTENT_ID
+  RESET_PARENT_INTENT_ID, LOGIN_REQUEST, LOGIN_REQUEST_SUCCESS, LOGIN_REQUEST_ERROR
 } from './constants';
 
 export function loadAgents() {
@@ -761,8 +761,31 @@ export function removeSettingsFallback(index) {
     index,
   };
 
-}export function resetParentIntenId() {
+}
+export function resetParentIntenId() {
   return {
     type: RESET_PARENT_INTENT_ID,
   };
+}
+
+export function requestLogin(credentials){
+  return {
+    type: LOGIN_REQUEST,
+    apiCall: true,
+    credentials
+  }
+}
+
+export function requestLoginSuccess(token) {
+  return {
+    type: LOGIN_REQUEST_SUCCESS,
+    token
+  }
+}
+
+export function requestLoginError(error) {
+  return {
+    type: LOGIN_REQUEST_ERROR,
+    error
+  }
 }
