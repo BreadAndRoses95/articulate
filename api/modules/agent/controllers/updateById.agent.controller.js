@@ -5,6 +5,7 @@ const Flat = require('../../../helpers/flat');
 const Cast = require('../../../helpers/cast');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
 
 const updateDataFunction = (redis, agentId, currentAgent, updateData, cb) => {
 
@@ -36,7 +37,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/agent/${agentId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -78,7 +79,7 @@ module.exports = (request, reply) => {
                                 Async.waterfall([
                                     (callbackGetDomains) => {
 
-                                        server.inject(`/agent/${agentId}/domain`, (res) => {
+                                        server.inject(formatRequest(`/agent/${agentId}/domain`), (res) => {
 
                                             if (res.statusCode !== 200){
                                                 const error = Boom.create(res.statusCode, `An error occurred getting the intents to update of the agent ${agentId}`);
@@ -111,7 +112,7 @@ module.exports = (request, reply) => {
                                                     Async.waterfall([
                                                         (callbackGetIntents) => {
 
-                                                            server.inject(`/domain/${domain.id}/intent`, (res) => {
+                                                            server.inject(formatRequest(`/domain/${domain.id}/intent`), (res) => {
 
                                                                 if (res.statusCode !== 200){
                                                                     const error = Boom.create(res.statusCode, `An error occurred getting the intents to update of the domain ${domain.domainName}`);
@@ -204,7 +205,7 @@ module.exports = (request, reply) => {
                                 Async.waterfall([
                                     (callbackGetEntities) => {
 
-                                        server.inject(`/agent/${agentId}/entity`, (res) => {
+                                        server.inject(formatRequest(`/agent/${agentId}/entity`), (res) => {
 
                                             if (res.statusCode !== 200){
                                                 const error = Boom.create(res.statusCode, `An error occurred getting the entities to update of the agent ${agentId}`);

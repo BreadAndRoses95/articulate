@@ -1,6 +1,7 @@
 'use strict';
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -24,7 +25,7 @@ module.exports = (request, reply) => {
 
             Async.each(settings, (setting, callback) => {
 
-                server.inject(`/settings/${setting}`, (res) => {
+                server.inject(formatRequest(`/settings/${setting}`), (res) => {
 
                     if (res.statusCode !== 200){
                         if (res.statusCode === 404){

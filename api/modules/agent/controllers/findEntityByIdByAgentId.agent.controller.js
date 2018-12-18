@@ -2,6 +2,7 @@
 const Async = require('async');
 const Boom = require('boom');
 const _ = require('lodash');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -13,7 +14,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject('/agent/' + agentId, (res) => {
+            server.inject(formatRequest('/agent/' + agentId), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -45,7 +46,7 @@ module.exports = (request, reply) => {
         (entity, cb) => {
 
             if (entity){
-                server.inject('/entity/' + entity[1], (res) => {
+                server.inject(formatRequest('/entity/' + entity[1]), (res) => {
 
                     if (res.statusCode !== 200){
                         const error = Boom.create(res.statusCode, `An error occurred getting the data of the entity ${entity[0]} with id ${entity[0]}`);

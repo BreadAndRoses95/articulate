@@ -4,6 +4,7 @@ const Boom = require('boom');
 const Flat = require('../../../helpers/flat');
 const ScenarioTools = require('../tools');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -132,7 +133,7 @@ module.exports = (request, reply) => {
             let parentIntentScenario;
             Async.series([
 
-                (cb) => server.inject(`/intent/${scenario.parentIntent}/scenario`, (res) => {
+                (cb) => server.inject(formatRequest(`/intent/${scenario.parentIntent}/scenario`), (res) => {
 
                     if (res.statusCode !== 200) {
                         if (res.statusCode === 404) {
@@ -156,7 +157,7 @@ module.exports = (request, reply) => {
                         url: `/intent/${scenario.parentIntent}/scenario`,
                         method: 'PUT',
                         payload: parentIntentScenario};
-                server.inject(options,(res)=>{
+                server.inject(formatRequest(options.url,options.method,options.payload),(res)=>{
                     if (res.statusCode !== 200) {
                         const error = Boom.create(res.statusCode, `An error occurred updating the scenario of the parent intent ${parentIntentScenario.id}`);
                         return cb(error, null);

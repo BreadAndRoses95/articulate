@@ -2,13 +2,15 @@
 const Async = require('async');
 const Boom = require('boom');
 const DefaultSettings =  require('./defaultSettings.json');
+const formatRequest = require('../modules/formatRequest.util')
+
 
 module.exports = (server, redis, callback) => {
 
     Async.eachLimit(Object.keys(DefaultSettings), 1,
         (setting, cb) => {
 
-            server.inject(`/settings/${setting}`, (res) => {
+            server.inject(formatRequest(`/settings/${setting}`), (res) => {
 
                 if (res.statusCode === 200){
                     return cb(null);
@@ -26,7 +28,7 @@ module.exports = (server, redis, callback) => {
                     payload
                 };
 
-                server.inject(options, (resPut) => {
+                server.inject(formatRequest(options.url,options.method,options.payload), (resPut) => {
 
                     if (resPut.statusCode !== 200) {
                         return cb(resPut.result);

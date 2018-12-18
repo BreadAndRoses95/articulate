@@ -1,6 +1,7 @@
 'use strict';
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -14,7 +15,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/agent/${agentId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -30,7 +31,7 @@ module.exports = (request, reply) => {
         },
         (cb) => {
 
-            server.inject(`/agent/${agentId}/domain/${domainId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}/domain/${domainId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -46,7 +47,7 @@ module.exports = (request, reply) => {
         },
         (cb) => {
 
-            server.inject(`/intent/${intentId}`, (res) => {
+            server.inject(formatRequest(`/intent/${intentId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -65,7 +66,7 @@ module.exports = (request, reply) => {
         },
         (cb) => {
 
-            server.inject(`/intent/${intentId}/scenario`, (res) => {
+            server.inject(formatRequest(`/intent/${intentId}/scenario`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){

@@ -6,6 +6,7 @@ const Flat = require('../../../helpers/flat');
 const IntentTools = require('../tools');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -66,7 +67,7 @@ module.exports = (request, reply) => {
                                         method: 'POST',
                                         payload: domainData
                                     };
-                                    server.inject(options, (res) => {
+                                    server.inject(formatRequest(options.url,options.method,options.payload), (res) => {
                                         if (res.statusCode !== 200) {
                                             const error = Boom.create(res.statusCode, `An error occurred adding new domain for follow up intents of the parent intent ${intent.id}`);
                                             return cllbk(error, null);

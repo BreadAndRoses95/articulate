@@ -4,6 +4,8 @@ const AgentTools = require('../tools');
 const Boom = require('boom');
 const Handlebars = require('handlebars');
 const RegisterHandlebarHelpers = require('../../../helpers/registerHandlebarsHelpers.js');
+const formatRequest = require('../../formatRequest.util')
+
 
 
 module.exports = (request, reply) => {
@@ -31,7 +33,7 @@ module.exports = (request, reply) => {
             Async.parallel({
                 parse: (cb) => {
 
-                    server.inject(`/agent/${agentId}/parse?text=${encodeURIComponent(text)}&${(timezone ? 'timezone=' + timezone : '')}`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/parse?text=${encodeURIComponent(text)}&${(timezone ? 'timezone=' + timezone : '')}`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -46,7 +48,7 @@ module.exports = (request, reply) => {
                 },
                 agent: (cb) => {
 
-                    server.inject(`/agent/${agentId}/export?withReferences=true`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/export?withReferences=true`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 400) {
@@ -61,7 +63,7 @@ module.exports = (request, reply) => {
                 },
                 context: (cb) => {
 
-                    server.inject(`/context/${sessionId}`, (res) => {
+                    server.inject(formatRequest(`/context/${sessionId}`), (res) => {
 
                         if (res.statusCode !== 200) {
                             const error = Boom.create(res.statusCode, `An error occurred getting the context of the session ${sessionId}`);

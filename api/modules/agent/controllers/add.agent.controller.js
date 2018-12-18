@@ -4,6 +4,7 @@ const Boom = require('boom');
 const Flat = require('../../../helpers/flat');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -60,7 +61,7 @@ module.exports = (request, reply) => {
         },
         getGlobalSettings: (cb) => {
 
-            server.inject('/settings', (res) => {
+            server.inject(formatRequest('/settings'), (res) => {
 
                 if (res.statusCode !== 200) {
                     const error = Boom.create(res.statusCode, 'An error occurred getting the global settings');
@@ -81,19 +82,17 @@ module.exports = (request, reply) => {
                 intentClassifierPipeline,
                 entityClassifierPipeline
             } = globalSettings;
-            server.inject({
-                method: 'PUT',
-                url: `/agent/${agentId}/settings`,
-                payload: {
-                    rasaURL,
-                    ducklingURL,
-                    ducklingDimension,
-                    spacyPretrainedEntities,
-                    domainClassifierPipeline,
-                    intentClassifierPipeline,
-                    entityClassifierPipeline
-                }
-            }, (res) => {
+            const payload = {
+              rasaURL,
+              ducklingURL,
+              ducklingDimension,
+              spacyPretrainedEntities,
+              domainClassifierPipeline,
+              intentClassifierPipeline,
+              entityClassifierPipeline
+            };
+            
+            server.inject(formatRequest(`/agent/${agentId}/settings`,'PUT',payload), (res) => {
 
                 if (res.statusCode !== 200) {
                     const error = Boom.create(res.statusCode, 'An error occurred adding the settings of the agent');

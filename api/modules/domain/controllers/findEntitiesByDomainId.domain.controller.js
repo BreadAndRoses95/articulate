@@ -1,6 +1,7 @@
 'use strict';
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -11,7 +12,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/domain/${domainId}`, (res) => {
+            server.inject(formatRequest(`/domain/${domainId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -39,7 +40,7 @@ module.exports = (request, reply) => {
 
             Async.map(entities, (entity, callback) => {
 
-                server.inject('/entity/' + entity, (res) => {
+                server.inject(formatRequest('/entity/' + entity), (res) => {
 
                     if (res.statusCode !== 200){
                         const error = Boom.create(res.statusCode, `An error occurred getting the data of the entity ${entity[1]}`);

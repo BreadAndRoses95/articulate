@@ -2,6 +2,7 @@
 const Async = require('async');
 const Boom = require('boom');
 const _ = require('lodash');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -13,7 +14,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject('/agent/' + agentId, (res) => {
+            server.inject(formatRequest('/agent/'+ agentId), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -45,7 +46,7 @@ module.exports = (request, reply) => {
         (domain, cb) => {
 
             if (domain){
-                server.inject('/domain/' + domain[1], (res) => {
+                server.inject(formatRequest('/domain/' + domain[1]), (res) => {
 
                     if (res.statusCode !== 200){
                         const error = Boom.create(res.statusCode, `An error occurred getting the data of the domain ${domain[0]} with id ${domain[1]}`);

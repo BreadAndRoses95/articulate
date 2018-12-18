@@ -41,6 +41,7 @@
     "handlebars-helpers": "^0.10.0",
     "handlebars-intl": "^1.1.2",
     "hapi": "^16.1.1",
+    "hapi-auth-jwt2": "^7.4.1",
     "hapi-swagger": "^7.7.0",
     "hapi-swaggered-ui": "^2.6.2",
     "inert": "^4.2.0",

@@ -7,6 +7,7 @@ const IntentTools = require('../tools');
 const _ = require('lodash');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
 
 const updateDataFunction = (redis, server, intentId, currentIntent, updateData, agentId, domainId, cb) => {
 
@@ -149,7 +150,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/intent/${intentId}`, (res) => {
+            server.inject(formatRequest(`/intent/${intentId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){

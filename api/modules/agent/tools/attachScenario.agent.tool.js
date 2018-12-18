@@ -2,10 +2,11 @@
 
 const debug = require('debug')('nlu:model:Converse:attachScenario');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (server, scenario, callback) => {
 
-    server.inject('/scenario/' + scenario, (res) => {
+    server.inject(formatRequest('/scenario/' + scenario), (res) => {
 
         if (res.statusCode !== 200){
             debug('NLU API - converse - attachScenario: Error= %o', res.result);

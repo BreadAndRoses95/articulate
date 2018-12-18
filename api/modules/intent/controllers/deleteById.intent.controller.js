@@ -4,6 +4,8 @@ const Boom = require('boom');
 const _ = require('lodash')
 const IntentTools = require('../tools');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
+
 
 module.exports = (request, reply) => {
 
@@ -15,7 +17,7 @@ module.exports = (request, reply) => {
     const getScenario = (intentId) => new Promise((resolve, reject) => {
         // let followUpIntents = [];
 
-        server.inject(`/intent/${intentId}/scenario`, (res) => {
+        server.inject(formatRequest(`/intent/${intentId}/scenario`), (res) => {
 
             if (res.statusCode !== 200) {
                 if (res.statusCode === 404) {
@@ -74,7 +76,7 @@ module.exports = (request, reply) => {
                                 method: 'PUT',
                                 payload: parentIntentScenario
                             };
-                            server.inject(options, (res) => {
+                            server.inject(formatRequest(options.url,options.method,options.payload), (res) => {
                                 if (res.statusCode !== 200) {
                                     const error = Boom.create(res.statusCode, `An error occurred updating the scenario of the parent intent ${parentIntentScenario.id}`);
                                     return cb(error, null);

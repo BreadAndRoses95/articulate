@@ -6,6 +6,7 @@ const Flat = require('../../../helpers/flat');
 const _ = require('lodash');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
 
 const updateDataFunction = (redis, entityId, currentEntity, updateData, cb) => {
 
@@ -46,7 +47,7 @@ module.exports = (request, reply) => {
     }
 
     const getAgent = (agentId) => new Promise((resolve, reject) => {
-        server.inject(`/agent/${agentId}/export?withReferences=true`, (res) => {
+        server.inject(formatRequest(`/agent/${agentId}/export?withReferences=true`), (res) => {
             (res) => {
 
             }
@@ -83,7 +84,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/entity/${entityId}`, (res) => {
+            server.inject(formatRequest(`/entity/${entityId}`), (res) => {
 
                 if (res.statusCode !== 200) {
                     if (res.statusCode === 404) {
@@ -250,7 +251,7 @@ module.exports = (request, reply) => {
                             },
                             (callbackGetIntentsOfDomain) => {
 
-                                server.inject(`/domain/${domain}/intent`, (res) => {
+                                server.inject(formatRequest(`/domain/${domain}/intent`), (res) => {
 
                                     if (res.statusCode !== 200) {
                                         const error = Boom.create(res.statusCode, `An error occurred getting the intents to update of the domain ${domain}`);
@@ -296,7 +297,7 @@ module.exports = (request, reply) => {
                                             Async.waterfall([
                                                 (callbackGetScenario) => {
 
-                                                    server.inject(`/intent/${intent.id}/scenario`, (res) => {
+                                                    server.inject(formatRequest(`/intent/${intent.id}/scenario`), (res) => {
 
                                                         if (res.statusCode !== 200) {
                                                             if (res.statusCode === 404) {

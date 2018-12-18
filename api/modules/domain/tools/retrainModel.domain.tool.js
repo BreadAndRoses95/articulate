@@ -6,6 +6,7 @@ const Boom = require('boom');
 const Guid = require('guid');
 const BuildTrainingData = require('./buildTrainingData.domain.tool');
 const YAML = require('json2yaml');
+const formatRequest = require('../../formatRequest.util')
 
 const retrainModel = (server, rasa, language, agentName, agentId, domainName, domainId, extraTrainingData, callback) => {
 
@@ -29,7 +30,7 @@ const retrainModel = (server, rasa, language, agentName, agentId, domainName, do
         (trainingSet, cb) => {
 
             model = (trainingSet.numberOfIntents === 1 ? 'just_er_' : '') + model;
-            server.inject(`/agent/${agentId}/settings/${trainingSet.numberOfIntents === 1 ? 'entity' : 'intent'}ClassifierPipeline`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}/settings/${trainingSet.numberOfIntents === 1 ? 'entity' : 'intent'}ClassifierPipeline`), (res) => {
 
                 if (res.statusCode !== 200){
                     const error = Boom.create(res.statusCode, 'An error occurred getting the data of the pipeline');
@@ -64,7 +65,7 @@ const retrainModel = (server, rasa, language, agentName, agentId, domainName, do
         },
         (cb) => {
 
-            server.inject(`/domain/${domainId}`, (res) => {
+            server.inject(formatRequest(`/domain/${domainId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     const error = Boom.create(res.statusCode, 'An error occurred getting the data of the domain to check old models');
@@ -110,7 +111,7 @@ const retrainModel = (server, rasa, language, agentName, agentId, domainName, do
             payload: updateDomainPayload
         };
 
-        server.inject(options, (res) => {
+        server.inject(formatRequest(options.url,options.method,options.payload), (res) => {
 
             if (res.statusCode !== 200) {
                 return callback(res.result);

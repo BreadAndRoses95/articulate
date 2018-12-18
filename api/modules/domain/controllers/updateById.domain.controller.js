@@ -5,6 +5,7 @@ const Cast = require('../../../helpers/cast');
 const Flat = require('../../../helpers/flat');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
 
 
 const updateDataFunction = (redis, domainId, currentDomain, updateData, cb) => {
@@ -38,7 +39,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/domain/${domainId}`, (res) => {
+            server.inject(formatRequest(`/domain/${domainId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -93,7 +94,7 @@ module.exports = (request, reply) => {
                         Async.waterfall([
                             (callbackGetIntents) => {
 
-                                server.inject(`/domain/${currentDomain.id}/intent`, (res) => {
+                                server.inject(formatRequest(`/domain/${currentDomain.id}/intent`), (res) => {
 
                                     if (res.statusCode !== 200){
                                         const error = Boom.create(res.statusCode, `An error occurred getting the intents to update of the domain ${currentDomain.domainName}`);

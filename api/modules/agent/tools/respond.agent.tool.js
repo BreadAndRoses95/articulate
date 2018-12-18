@@ -5,6 +5,7 @@ const _ = require('lodash');
 const RespondIntent = require('./respondIntent.agent.tool');
 const RespondFallback = require('./respondFallback.agent.tool');
 const AgentTools = require('../tools');
+const formatRequest = require('../../formatRequest.util')
 
 
 const getCurrentContext = (conversationStateObject) => {
@@ -256,7 +257,7 @@ const persistContext = (server, conversationStateObject, cb) => {
                     }
                 };
 
-                server.inject(options, (res) => {
+                server.inject(formatRequest(options.url,options.method,options.payload), (res) => {
 
                     if (res.statusCode !== 200) {
                         const error = Boom.create(res.statusCode, `An error occurred updating the context ${elementInContext.id} of the session ${conversationStateObject.sessionId}`);
@@ -280,7 +281,7 @@ const persistContext = (server, conversationStateObject, cb) => {
                 payload: elementInContext
             };
 
-            server.inject(options, (res) => {
+            server.inject(formatRequest(options.url,options.method,options.payload), (res) => {
 
                 if (res.statusCode !== 200) {
                     const error = Boom.create(res.statusCode, `An error occurred adding the a new element to the session ${conversationStateObject.sessionId}`);

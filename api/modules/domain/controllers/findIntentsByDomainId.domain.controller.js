@@ -2,6 +2,8 @@
 const Async = require('async');
 const Boom = require('boom');
 const _ = require('lodash');
+const formatRequest = require('../../formatRequest.util')
+
 
 module.exports = (request, reply) => {
 
@@ -25,7 +27,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
             (cb) => {
 
-                server.inject(`/domain/${domainId}`, (res) => {
+                server.inject(formatRequest(`/domain/${domainId}`), (res) => {
 
                     if (res.statusCode !== 200) {
                         if (res.statusCode === 404) {
@@ -70,7 +72,7 @@ module.exports = (request, reply) => {
                 Async.map(intents, (intent, callback) => {
                         Async.parallel({
                                 intent: (cbIntent) => {
-                                    server.inject('/intent/' + intent.id, (res) => {
+                                    server.inject(formatRequest('/intent/' + intent.id), (res) => {
 
                                         if (res.statusCode !== 200) {
                                             const error = Boom.create(res.statusCode, `An error occurred getting the data of the intent ${intent.id}`);
@@ -81,7 +83,7 @@ module.exports = (request, reply) => {
                                 },
                                 scenario: (cbScenario) => {
 
-                                    server.inject('/intent/' + intent.id + '/scenario', (res) => {
+                                    server.inject(formatRequest('/intent/' + intent.id + '/scenario'), (res) => {
 
                                         if (res.statusCode !== 200) {
                                             const error = Boom.create(res.statusCode, `An error occurred getting the scenario of the intent ${intent.id}`);
@@ -153,7 +155,7 @@ module.exports = (request, reply) => {
                                                     });
                                             },
                                             (cbFindParentIntent) => {
-                                                server.inject('/intent/' + resultCompletedIntent.parentIntent, (res) => {
+                                                server.inject(formatRequest('/intent/' + resultCompletedIntent.parentIntent), (res) => {
 
                                                     if (res.statusCode !== 200) {
                                                         const error = Boom.create(res.statusCode, `An error occurred getting the data of the parent intent ${resultCompletedIntent.parentIntent}`);

@@ -6,6 +6,7 @@ const DomainTools = require('../../domain/tools');
 const Wreck = require('wreck');
 const Status = require('../../../helpers/status.json');
 const _ = require('lodash');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -18,7 +19,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (callbackGetAgent) => {
 
-            server.inject(`/agent/${agentId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}`), (res) => {
 
                 if (res.statusCode !== 200) {
                     if (res.statusCode === 400) {
@@ -38,7 +39,7 @@ module.exports = (request, reply) => {
         },
         (callbackGetRasa) => {
 
-            server.inject(`/agent/${agentId}/settings/rasaURL`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}/settings/rasaURL`), (res) => {
 
                 if (res.statusCode !== 200) {
                     if (res.statusCode === 404) {
@@ -85,7 +86,7 @@ module.exports = (request, reply) => {
                 Async.waterfall([
                     (callbackGetDomains) => {
 
-                        server.inject(`/agent/${agentId}/domain`, (res) => {
+                        server.inject(formatRequest(`/agent/${agentId}/domain`), (res) => {
 
                             if (res.statusCode !== 200) {
                                 const error = Boom.create(res.statusCode, 'An error occurred getting the domains of the agent to train them');
@@ -136,7 +137,7 @@ module.exports = (request, reply) => {
                                     },
                                     (callbackTrainDomain) => {
 
-                                        server.inject(`/domain/${domain.id}/train`, (res) => {
+                                        server.inject(formatRequest(`/domain/${domain.id}/train`), (res) => {
 
                                             if (res.statusCode === 200) {
                                                 return callbackTrainDomain(null);

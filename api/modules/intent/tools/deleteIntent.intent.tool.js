@@ -2,6 +2,7 @@
 const _ = require('lodash');
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
 
 const deleteIntentTool = (server, redis, intentId, callback) => {
@@ -12,7 +13,7 @@ const deleteIntentTool = (server, redis, intentId, callback) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/intent/${intentId}`, (res) => {
+            server.inject(formatRequest(`/intent/${intentId}`), (res) => {
 
                 if (res.statusCode !== 200) {
                     if (res.statusCode === 404) {
@@ -105,7 +106,7 @@ const deleteIntentTool = (server, redis, intentId, callback) => {
 
                                 Async.waterfall([
                                         (cb) => {
-                                            server.inject(`/domain/${domainId}/intent`, (res) => {
+                                            server.inject(formatRequest(`/domain/${domainId}/intent`), (res) => {
                                                 if (res.statusCode !== 200) {
                                                     const error = Boom.create(res.statusCode, `An error occurred getting the data of the domain ${domainId}`);
                                                     return cb(error, null);
@@ -120,7 +121,7 @@ const deleteIntentTool = (server, redis, intentId, callback) => {
                                                     method: 'DELETE',
                                                     url: `/domain/${domainId}`,
                                                 }
-                                                server.inject(options, (res) => {
+                                                server.inject(formatRequest(options.url,options.method,options.payload), (res) => {
                                                     if (res.statusCode !== 200) {
                                                         if (res.statusCode === 404) {
                                                             const errorNotFound = Boom.notFound('The specified domain doesn\'t exists');

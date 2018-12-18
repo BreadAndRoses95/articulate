@@ -5,6 +5,7 @@ const Boom = require('boom');
 const AgentTools = require('../tools');
 const Flat = require('../../../helpers/flat');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
+const formatRequest = require('../../formatRequest.util')
 
 const getConfidence = (confidence) => {
 
@@ -140,7 +141,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (callback) => {
 
-            server.inject('/agent/' + agentId, (res) => {
+            server.inject(formatRequest('/agent/' + agentId), (res) => {
 
                 if (res.statusCode !== 200) {
                     if (res.statusCode === 404) {
@@ -159,7 +160,7 @@ module.exports = (request, reply) => {
                 trainedDomains: Async.apply(AgentTools.getAvailableDomains, server, redis, agent),
                 duckling: (callbackGetRasa) => {
 
-                    server.inject(`/agent/${agentId}/settings/ducklingURL`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/settings/ducklingURL`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -174,7 +175,7 @@ module.exports = (request, reply) => {
                 },
                 rasa: (callbackGetRasa) => {
 
-                    server.inject(`/agent/${agentId}/settings/rasaURL`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/settings/rasaURL`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -189,7 +190,7 @@ module.exports = (request, reply) => {
                 },
                 spacyPretrainedEntities: (callbackGetSpacyPretrainedEntities) => {
 
-                    server.inject(`/agent/${agentId}/settings/spacyPretrainedEntities`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/settings/spacyPretrainedEntities`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -204,7 +205,7 @@ module.exports = (request, reply) => {
                 },
                 ducklingDimension: (callbackGetDucklinDimensions) => {
 
-                    server.inject(`/agent/${agentId}/settings/ducklingDimension`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/settings/ducklingDimension`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -219,7 +220,7 @@ module.exports = (request, reply) => {
                 },
                 ERPipeline: (callbackGetRasa) => {
 
-                    server.inject(`/agent/${agentId}/settings/entityClassifierPipeline`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/settings/entityClassifierPipeline`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -234,7 +235,7 @@ module.exports = (request, reply) => {
                 },
                 intents: (callbackGetIntent) => {
 
-                    server.inject(`/agent/${agentId}/intent`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/intent`), (res) => {
 
                         if (res.statusCode !== 200) {
                             const error = Boom.create(res.statusCode, 'An error occurred getting the intents of the agent');

@@ -4,6 +4,7 @@ const Boom = require('boom');
 const Cast = require('../../../helpers/cast');
 const Flat = require('../../../helpers/flat');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
+const formatRequest = require('../../formatRequest.util')
 
 const updateDataFunction = (redis, intentId, currentPostFormat, updateData, cb) => {
 
@@ -41,7 +42,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/intent/${intentId}/postFormat`, (res) => {
+            server.inject(formatRequest(`/intent/${intentId}/postFormat`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){

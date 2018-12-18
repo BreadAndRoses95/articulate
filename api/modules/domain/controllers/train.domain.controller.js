@@ -3,6 +3,7 @@ const Async = require('async');
 const Boom = require('boom');
 const Cast = require('../../../helpers/cast');
 const DomainTools = require('../tools');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -17,7 +18,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (callback) => {
 
-            server.inject(`/domain/${domainId}`, (res) => {
+            server.inject(formatRequest(`/domain/${domainId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -49,7 +50,7 @@ module.exports = (request, reply) => {
         },
         (callback) => {
 
-            server.inject(`/agent/${agentId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 400){
@@ -65,7 +66,7 @@ module.exports = (request, reply) => {
         },
         (callback) => {
 
-            server.inject(`/agent/${agentId}/settings/rasaURL`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}/settings/rasaURL`), (res) => {
 
                 if (res.statusCode !== 200) {
                     if (res.statusCode === 404) {
@@ -94,7 +95,7 @@ module.exports = (request, reply) => {
         if (err){
             return reply(err);
         }
-        server.inject(`/domain/${domainId}`, (res) => {
+        server.inject(formatRequest(`/domain/${domainId}`), (res) => {
 
             if (res.statusCode !== 200){
                 const error = Boom.create(res.statusCode, 'An error occurred getting the domain after training');

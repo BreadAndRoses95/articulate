@@ -2,6 +2,8 @@
 const Boom = require('boom');
 const Flat = require('../../../helpers/flat');
 const Async = require('async');
+const formatRequest = require('../../formatRequest.util')
+
 
 module.exports = (request, reply) => {
 
@@ -78,7 +80,7 @@ module.exports = (request, reply) => {
         if (err){
             return reply(err);
         }
-        server.inject(`/agent/${agentId}/settings`, (res) => {
+        server.inject(formatRequest(`/agent/${agentId}/settings`), (res) => {
 
             if (res.statusCode !== 200){
                 const error = Boom.create(res.statusCode, 'An error occurred retrieving the settings after update');

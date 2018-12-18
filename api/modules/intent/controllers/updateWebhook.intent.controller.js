@@ -4,6 +4,7 @@ const Boom = require('boom');
 const Cast = require('../../../helpers/cast');
 const Flat = require('../../../helpers/flat');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
+const formatRequest = require('../../formatRequest.util')
 
 const updateDataFunction = (redis, intentId, currentWebhook, updateData, cb) => {
 
@@ -47,7 +48,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/intent/${intentId}/webhook`, (res) => {
+            server.inject(formatRequest(`/intent/${intentId}/webhook`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){

@@ -2,9 +2,10 @@
 const Async = require('async');
 const Boom = require('boom');
 const _ = require('lodash');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
-
+  
     const server = request.server;
     const redis = server.app.redis;
     let start = 0;
@@ -33,7 +34,7 @@ module.exports = (request, reply) => {
 
             Async.map(agents, (agent, callback) => {
 
-                server.inject('/agent/' + agent[1], (res) => {
+                server.inject(formatRequest('/agent/' + agent[1]), (res) => {
 
                     if (res.statusCode !== 200){
                         const error = Boom.create(res.statusCode, `An error occurred getting the data of agent ${agent[0]} with id ${agent[1]}`);

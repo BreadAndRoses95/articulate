@@ -2,6 +2,7 @@
 const Boom = require('boom');
 const _ = require('lodash');
 const Async = require('async');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (server, redis, agent, cb) => {
 
@@ -17,7 +18,7 @@ module.exports = (server, redis, agent, cb) => {
             return cb(null, [formattedDomain]);
         }
         //Given that the agent only have one intent and is the model is just an ER, then we need the intent name
-        server.inject(`/agent/${agent.id}/export`, (res) => {
+        server.inject(formatRequest(`/agent/${agent.id}/export`), (res) => {
 
             if (res.statusCode !== 200){
                 const error = Boom.create(res.statusCode, 'An error occurred getting the agent data to get the intent name');
@@ -32,7 +33,7 @@ module.exports = (server, redis, agent, cb) => {
         Async.waterfall([
             (callbackGetDomainsOfAgent) => {
 
-                server.inject(`/agent/${agent.id}/domain`, (res) => {
+                server.inject(formatRequest(`/agent/${agent.id}/domain`), (res) => {
 
                     if (res.statusCode !== 200){
                         const error = Boom.create(res.statusCode, `An error occurred getting the list of domains from agent ${agent.id}`);
@@ -65,7 +66,7 @@ module.exports = (server, redis, agent, cb) => {
                     const modelFolderName = domainName + '_' + domain.model;
                     const justER = modelFolderName.indexOf('just_er') !== -1;
                     if (justER){
-                        server.inject(`/agent/${agent.id}/domain/${domain.id}/intent`, (res) => {
+                        server.inject(formatRequest(`/agent/${agent.id}/domain/${domain.id}/intent`), (res) => {
 
                             if (res.statusCode !== 200){
                                 const error = Boom.create(res.statusCode, `An error occurred getting the list of intents of the domain ${domain.domainName}`);

@@ -1,6 +1,8 @@
 'use strict';
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
+
 
 module.exports = (request, reply) => {
 
@@ -12,7 +14,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/entity/${entityId}`, (res) => {
+            server.inject(formatRequest(`/entity/${entityId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){

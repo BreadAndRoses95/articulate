@@ -2,6 +2,7 @@
 const Async = require('async');
 const Boom = require('boom');
 const _ = require('lodash');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -54,7 +55,7 @@ module.exports = (request, reply) => {
 
             Async.map(entities, (entity, callback) => {
 
-                server.inject('/entity/' + entity.id, (res) => {
+                server.inject(formatRequest('/entity/' + entity.id), (res) => {
 
                     if (res.statusCode !== 200){
                         const error = Boom.create(res.statusCode, `An error occurred getting the data of the entity ${entity.id} with id ${entity.id}`);

@@ -2,6 +2,7 @@
 const Async = require('async');
 const Boom = require('boom');
 const _ = require('lodash');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -20,7 +21,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/entity/${id}`, (res) => {
+            server.inject(formatRequest(`/entity/${id}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -49,7 +50,7 @@ module.exports = (request, reply) => {
 
             Async.map(intents, (intent, callback) => {
 
-                server.inject(`/intent/${intent[1]}`, (res) => {
+                server.inject(formatRequest(`/intent/${intent[1]}`), (res) => {
 
                     if (res.statusCode !== 200) {
                         const error = Boom.create(res.statusCode, `An error occurred getting the data of the intent ${intent[0]} with id ${intent[1]}`);

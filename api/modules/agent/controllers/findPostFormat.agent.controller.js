@@ -3,6 +3,7 @@ const Boom = require('boom');
 const Flat = require('../../../helpers/flat');
 const Cast = require('../../../helpers/cast');
 const Async = require('async');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -13,7 +14,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/agent/${agentId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){

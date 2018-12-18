@@ -1,6 +1,7 @@
 'use strict';
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -12,7 +13,7 @@ module.exports = (request, reply) => {
 
         (callbackGetAgent) => {
 
-            server.inject(`/agent/${agentId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}`), (res) => {
 
                 if (res.statusCode !== 200) {
                     if (res.statusCode === 404) {
@@ -33,7 +34,7 @@ module.exports = (request, reply) => {
                     Async.waterfall([
                         (callbackGetDomains) => {
 
-                            server.inject(`/agent/${agentId}/domain`, (res) => {
+                            server.inject(formatRequest(`/agent/${agentId}/domain`), (res) => {
 
                                 if (res.statusCode !== 200) {
                                     const error = Boom.create(res.statusCode, `An error occurred getting the list of domains of the agent ${exportedAgent.agent}`);
@@ -49,7 +50,7 @@ module.exports = (request, reply) => {
                                 Async.waterfall([
                                     (callbackGetIntentsFromDomain) => {
 
-                                        server.inject(`/agent/${agentId}/domain/${exportedDomain.id}/intent`, (res) => {
+                                        server.inject(formatRequest(`/agent/${agentId}/domain/${exportedDomain.id}/intent`), (res) => {
 
                                             if (res.statusCode !== 200) {
                                                 const error = Boom.create(res.statusCode, `An error occurred getting the list of intents for domain ${exportedDomain.domain} of the agent ${exportedAgent.agent}`);
@@ -74,7 +75,7 @@ module.exports = (request, reply) => {
 
                                         Async.map(exportedIntentsForDomain, (exportedIntentForDomain, callbackGetIntentScenario) => {
 
-                                            server.inject(`/agent/${agentId}/domain/${exportedDomain.id}/intent/${exportedIntentForDomain.id}/scenario`, (res) => {
+                                            server.inject(formatRequest(`/agent/${agentId}/domain/${exportedDomain.id}/intent/${exportedIntentForDomain.id}/scenario`), (res) => {
 
                                                 if (res.statusCode !== 200) {
                                                     if (res.statusCode === 404) {
@@ -103,7 +104,7 @@ module.exports = (request, reply) => {
 
                                         Async.map(exportedIntentsForDomain, (exportedIntentForDomain, callbackGetIntentWebhook) => {
 
-                                            server.inject(`/agent/${agentId}/domain/${exportedDomain.id}/intent/${exportedIntentForDomain.id}/webhook`, (res) => {
+                                            server.inject(formatRequest(`/agent/${agentId}/domain/${exportedDomain.id}/intent/${exportedIntentForDomain.id}/webhook`), (res) => {
 
                                                 if (res.statusCode !== 200) {
                                                     if (res.statusCode === 404) {
@@ -134,7 +135,7 @@ module.exports = (request, reply) => {
 
                                         Async.map(exportedIntentsForDomain, (exportedIntentForDomain, callbackGetIntentPostFormat) => {
 
-                                            server.inject(`/agent/${agentId}/domain/${exportedDomain.id}/intent/${exportedIntentForDomain.id}/postFormat`, (res) => {
+                                            server.inject(formatRequest(`/agent/${agentId}/domain/${exportedDomain.id}/intent/${exportedIntentForDomain.id}/postFormat`), (res) => {
 
                                                 if (res.statusCode !== 200 ) {
                                                     if (res.statusCode === 404) {
@@ -199,7 +200,7 @@ module.exports = (request, reply) => {
                 },
                 entities: (callbackGetEntities) => {
 
-                    server.inject(`/agent/${agentId}/entity`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/entity`), (res) => {
 
                         if (res.statusCode !== 200) {
                             const error = Boom.create(res.statusCode, `An error occurred getting the list of entities of agent ${exportedAgent.agentName}`);
@@ -218,7 +219,7 @@ module.exports = (request, reply) => {
                 },
                 webhook: (callbackGetWebhook) => {
 
-                    server.inject(`/agent/${agentId}/webhook`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/webhook`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -238,7 +239,7 @@ module.exports = (request, reply) => {
                 },
                 postFormat: (callbackGetPostFormat) => {
 
-                    server.inject(`/agent/${agentId}/postFormat`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/postFormat`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {
@@ -258,7 +259,7 @@ module.exports = (request, reply) => {
                 },
                 settings: (callbackGetSettings) => {
 
-                    server.inject(`/agent/${agentId}/settings`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentId}/settings`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 404) {

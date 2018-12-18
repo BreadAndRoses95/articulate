@@ -67,4 +67,4 @@ Server((err, server) => {
             }
         });
     });
-});
+}, true);

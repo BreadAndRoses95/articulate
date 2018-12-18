@@ -2,6 +2,7 @@
 const Async = require('async');
 const Boom = require('boom');
 const Status = require('../../../helpers/status.json');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -15,7 +16,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/domain/${domainId}`, (res) => {
+            server.inject(formatRequest(`/domain/${domainId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -34,7 +35,7 @@ module.exports = (request, reply) => {
             Async.waterfall([
                 (callbackGetIntents) => {
 
-                    server.inject(`/domain/${domain.id}/intent`, (res) => {
+                    server.inject(formatRequest(`/domain/${domain.id}/intent`), (res) => {
 
                         if (res.statusCode !== 200){
                             const error = Boom.create(res.statusCode, `An error occurred getting the intents to delete of the domain ${domainId}`);

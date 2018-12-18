@@ -2,6 +2,7 @@
 const _ = require('lodash');
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
 const extractEntities = (examples) => {
 
@@ -132,7 +133,7 @@ const updateEntitiesDomain = (server, redis, intent, agentId, domainId, oldExamp
                     },
                     (entityId, cllbk) => {
 
-                        server.inject(`/entity/${entityId}/intent`, (res) => {
+                        server.inject(formatRequest(`/entity/${entityId}/intent`), (res) => {
 
                             if (res.result && res.result.statusCode && res.result.statusCode !== 200){
                                 const error = Boom.badImplementation(`An error occurred checking if the entity ${entityId} is being used by other intents`);

@@ -3,6 +3,7 @@ const Async = require('async');
 const Boom = require('boom');
 const _ = require('lodash');
 const Cast = require('../../../helpers/cast');
+const formatRequest = require('../../formatRequest.util')
 
 module.exports = (request, reply) => {
 
@@ -41,7 +42,7 @@ module.exports = (request, reply) => {
             Async.map(domains, (domain, callback) => {
 
                 const url = `/domain/${domain[1]}/intent${filter !== '' ? `?filter=${filter}` : ''}`;
-                server.inject(url, (res) => {
+                server.inject(formatRequest(url), (res) => {
 
                     if (res.statusCode !== 200){
                         const error = Boom.create(res.statusCode, `An error occurred getting the data of the domain ${domain[0]} with id ${domain[1]}`);

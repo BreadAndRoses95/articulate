@@ -4,6 +4,7 @@ const Async = require('async');
 const Wreck = require('wreck');
 const Boom = require('boom');
 const YAML = require('json2yaml');
+const formatRequest = require('../../formatRequest.util')
 
 const BuildDomainRecognitionTrainingData = require('./buildDomainRecognitionTrainingData.domain.tool');
 
@@ -27,7 +28,7 @@ const retrainDomainRecognizer = (server, redis, rasa, language, agentName, agent
         },
         (trainingSet, cb) => {
 
-            server.inject(`/agent/${agentId}/settings/${trainingSet.numberOfIntents === 1 ? 'entity' : 'domain'}ClassifierPipeline`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}/settings/${trainingSet.numberOfIntents === 1 ? 'entity' : 'domain'}ClassifierPipeline`), (res) => {
 
                 if (res.statusCode !== 200){
                     const error = Boom.create(res.statusCode, 'An error occurred getting the data of the pipeline');

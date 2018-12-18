@@ -4,6 +4,8 @@ const Async = require('async');
 const Boom = require('boom');
 const Wreck = require('wreck');
 const Querystring = require('querystring');
+const formatRequest = require('../../formatRequest.util')
+
 
 const DucklingOutputToIntervals = require('./ducklingOutputToInterval.agent.tool');
 
@@ -239,7 +241,7 @@ const parseText = (rasa, spacyPretrainedEntities, ERPipeline, ducklingService, d
 
                 (callbackGetAgent) => {
 
-                    server.inject(`/agent/${agentData.agent.id}/export?withReferences=true`, (res) => {
+                    server.inject(formatRequest(`/agent/${agentData.agent.id}/export?withReferences=true`), (res) => {
 
                         if (res.statusCode !== 200) {
                             if (res.statusCode === 400) {

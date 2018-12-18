@@ -1,13 +1,14 @@
 'use strict';
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
 
-const getAgentData = (server, agentId, cb) => {
+const getAgentData = (server, agentId, request, cb) => {
 
     Async.waterfall([
         (callback) => {
 
-            server.inject(`/agent/${agentId}/domain`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}/domain`), (res) => {
 
                 if (res.statusCode !== 200){
                     const error = Boom.create(res.statusCode, `An error occurred getting the domainst of the agent ${agentId}`);
@@ -23,7 +24,7 @@ const getAgentData = (server, agentId, cb) => {
                 Async.parallel({
                     entities: (cllbck) => {
 
-                        server.inject(`/domain/${domain.id}/entity`, (res) => {
+                        server.inject(formatRequest(`/domain/${domain.id}/entity`), (res) => {
 
                             if (res.statusCode !== 200){
                                 const error = Boom.create(res.statusCode, `An error occurred getting the entities of the domain ${domain.domainName}`);
@@ -34,7 +35,7 @@ const getAgentData = (server, agentId, cb) => {
                     },
                     intents: (cllbck) => {
 
-                        server.inject(`/domain/${domain.id}/intent`, (res) => {
+                        server.inject(formatRequest(`/domain/${domain.id}/intent`), (res) => {
 
                             if (res.statusCode !== 200){
                                 const error = Boom.create(res.statusCode, `An error occurred getting the intents of the domain ${domain.domainName}`);

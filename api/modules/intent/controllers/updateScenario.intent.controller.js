@@ -4,6 +4,7 @@ const Boom = require('boom');
 const Flat = require('../../../helpers/flat');
 const ScenarioTools = require('../tools');
 const RemoveBlankArray = require('../../../helpers/removeBlankArray');
+const formatRequest = require('../../formatRequest.util')
 
 const updateDataFunction = (redis, intentId, currentScenario, updateData, cb) => {
 
@@ -50,7 +51,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/intent/${intentId}/scenario`, (res) => {
+            server.inject(formatRequest(`/intent/${intentId}/scenario`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){

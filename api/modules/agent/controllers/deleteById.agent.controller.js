@@ -1,6 +1,8 @@
 'use strict';
 const Async = require('async');
 const Boom = require('boom');
+const formatRequest = require('../../formatRequest.util')
+
 
 module.exports = (request, reply) => {
 
@@ -11,7 +13,7 @@ module.exports = (request, reply) => {
     Async.waterfall([
         (cb) => {
 
-            server.inject(`/agent/${agentId}`, (res) => {
+            server.inject(formatRequest(`/agent/${agentId}`), (res) => {
 
                 if (res.statusCode !== 200){
                     if (res.statusCode === 404){
@@ -35,7 +37,7 @@ module.exports = (request, reply) => {
                             Async.waterfall([
                                 (callbackGetDomains) => {
 
-                                    server.inject(`/agent/${agentId}/domain`, (res) => {
+                                    server.inject(formatRequest(`/agent/${agentId}/domain`), (res) => {
 
                                         if (res.statusCode !== 200){
                                             const error = Boom.create(res.statusCode, `An error occurred getting the domains to delete from the agent ${agentId}`);
@@ -54,7 +56,7 @@ module.exports = (request, reply) => {
                                                 Async.waterfall([
                                                     (callbackGetIntents) => {
 
-                                                        server.inject(`/domain/${domain.id}/intent`, (res) => {
+                                                        server.inject(formatRequest(`/domain/${domain.id}/intent`), (res) => {
 
                                                             if (res.statusCode !== 200){
                                                                 const error = Boom.create(res.statusCode, `An error occurred getting the intents to delete of the domain ${domain.domainName}`);
@@ -185,7 +187,7 @@ module.exports = (request, reply) => {
                             Async.waterfall([
                                 (callbackGetEntities) => {
 
-                                    server.inject(`/agent/${agentId}/entity`, (res) => {
+                                    server.inject(formatRequest(`/agent/${agentId}/entity`), (res) => {
 
                                         if (res.statusCode !== 200){
                                             const error = Boom.create(res.statusCode, `An error occurred getting the entities to delete of the agent ${agentId}`);
