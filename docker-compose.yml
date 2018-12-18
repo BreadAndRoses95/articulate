@@ -8,12 +8,15 @@ services:
     entrypoint: ['node', 'start.js']
     environment:
      - SWAGGER_BASE_PATH
+     - PERMISSION_CHATBOT
+     - PUBLIC_KEY_URL
   ui:
     image: samtecspg/articulate-ui:repo-head
     ports: ['0.0.0.0:3000:3000']
     networks: ['alpha-nlu-network']
     environment:
      - API_URL
+     - TOKEN_ENDPOINT
   rasa:
     image: samtecspg/articulate-rasa:repo-head
     ports: ['0.0.0.0:5000:5000']
