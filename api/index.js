@@ -18,22 +18,23 @@ let publicKey;
 let permissionName = process.env.PERMISSION_CHATBOT ? process.env.PERMISSION_CHATBOT : 'ADMIN_CHATBOT';
 let urlPublicKey = process.env.PUBLIC_KEY_URL ? process.env.PUBLIC_KEY_URL : '';
 
-const customErrorFunc = function (error) {
-  
-  // do your checks to see if the person is valid
-  
-  console.log(error)
-  
-};
-
-const isUserChatbotAdmin =  function(decoded){
-  const isUserWithAdminPermission = decoded.permissions.some((permission)=> permission.name === permissionName)
-  return isUserWithAdminPermission;
+const getPublicKey = async function () {
+  const resultApiPublicKey = await axios(
+    {
+      url: urlPublicKey,
+      method: 'GET',
+      headers: {'Accept': 'application/x-pem-file'}
+    })
+  return resultApiPublicKey.data
+}
+const validate = function (decoded, request, callback) {
+  return (callback(null, isUserChatbotAdmin(decoded)))
 }
 
-const validate = function (decoded, request, callback) {
-  // const a = zlib.inflateSync(Buffer.from(decoded))
-  return (callback(null, isUserChatbotAdmin(decoded)))
+
+const isUserChatbotAdmin = function (decoded) {
+  const isUserWithAdminPermission = decoded.permissions.some((permission) => permission.name === permissionName)
+  return isUserWithAdminPermission;
 }
 
 
@@ -97,30 +98,41 @@ const initRedis = (next) => {
     return next(err);
   });
 };
-
 const initHapi = (secure) => (next) => {
   
   const server = new Hapi.Server();
   server.connection({port: 7500, routes: {cors: true}});
-  console.log(urlPublicKey)
+  
+  const customErrorFunc = (error) => {
+    console.log("Could not verify token")
+    console.log(error)
+    getPublicKey().then((newPublicKey) => {
+      console.log(`Refreshing public key: ${newPublicKey}`)
+      publicKey = newPublicKey;
+    })
+    
+    return error;
+  };
+  
+  const keyFunc = function(decoded,callback)
+  {
+    return callback(null,Buffer.from(publicKey),null)
+  }
+
   
   server.register(require('hapi-auth-jwt2'), async function (err) {
     if (err) {
       console.log(err)
     }
-    if (!publicKey){
-      const resultApiPublicKey = await axios(
-        {url: urlPublicKey,
-          method:'GET',
-          headers:{'Accept':'application/x-pem-file'}
-        })
-      publicKey = resultApiPublicKey.data
+    if (!publicKey) {
+      publicKey = await getPublicKey()
     }
     
     server.auth.strategy('jwt', 'jwt',
       {
-        key: Buffer.from(publicKey),
+        key: keyFunc,
         validateFunc: validate,
+        errorFunc: customErrorFunc
       });
     if (secure) {
       server.auth.default('jwt');

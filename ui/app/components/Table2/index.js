@@ -105,9 +105,7 @@ class Table2 extends React.Component { // eslint-disable-line react/prefer-state
             if (rowInfo.original.followUpDomainId) {
               this.props.onSelectFollowUpIntents({target: {value: rowInfo.original.followUpDomainId}})
             }
-            console.log(rowInfo.original.parentDomainId)
             if (rowInfo.original.parentDomainId && rowInfo.original.followUpDomainId === undefined) {
-              console.log(rowInfo.original.parentDomainId);
               this.props.onSelectFollowUpIntents({target: {value: rowInfo.original.parentDomainId}})
             }
             //console.log(rowInfo.original.parentDomainId, rowInfo.original.followUpDomainId)
