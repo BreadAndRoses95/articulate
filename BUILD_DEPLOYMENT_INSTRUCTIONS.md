@@ -2,7 +2,7 @@
 
 - To build the project with local sources, use:
 ```
-dockker-compose -f docker-compose.yml -f build-compose-override.yml build api ui
+dockker-compose -f docker-compose.yml -f build-compose-override.yml build
 ```
 
 # DEPLOYMENT
