@@ -102,6 +102,7 @@ const initHapi = (secure) => (next) => {
   
   const server = new Hapi.Server();
   server.connection({port: 7500, routes: {cors: true}});
+  console.log(urlPublicKey)
   
   server.register(require('hapi-auth-jwt2'), async function (err) {
     if (err) {
