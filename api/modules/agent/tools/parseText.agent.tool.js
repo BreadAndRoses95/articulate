@@ -21,6 +21,7 @@ const getRasaParse = (textToParse, trainedDomain, agentName, rasa, ERPipeline, c
 
         if (err) {
             const error = Boom.badImplementation(`Error calling rasa to parse text on domain ${trainedDomain.name}`);
+            console.log(err)
             return callback(error, null);
         }
 

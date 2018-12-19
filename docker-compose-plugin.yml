@@ -5,7 +5,7 @@ services:
     image: samtecspg/articulate-api:repo-head
     ports: ['0.0.0.0:7500:7500', '0.0.0.0:5828:5828']
     
-    entrypoint: ['node', '--debug','start.js']
+    entrypoint: ['node','--inspect=5828' ,'start.js']
     environment:
      - SWAGGER_BASE_PATH
      - PERMISSION_CHATBOT
@@ -15,8 +15,8 @@ services:
     ports: ['0.0.0.0:3000:3000']
     
     environment:
-     - API_URL
      - TOKEN_ENDPOINT
+     - API_URL
   rasa:
     image: samtecspg/articulate-rasa:repo-head
     ports: ['0.0.0.0:5000:5000']

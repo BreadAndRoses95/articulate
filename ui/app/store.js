@@ -21,6 +21,7 @@ export default function configureStore(initialState = {}, history) {
   // 2. sagaMiddleware: Makes redux-sagas work
   // 3. routerMiddleware: Syncs the location/URL path to the state
 
+  console.log(process.env)
   const apiURL = process.env.API_URL || 'http://localhost:7500'
 
   const middlewares = [

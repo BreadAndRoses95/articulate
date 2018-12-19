@@ -12,6 +12,9 @@ let processEnv = {
 if (process.env.API_URL) {
   processEnv.API_URL = JSON.stringify(process.env.API_URL);
 }
+if (process.env.TOKEN_ENDPOINT) {
+  processEnv.TOKEN_ENDPOINT = JSON.stringify(process.env.TOKEN_ENDPOINT);
+}
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
