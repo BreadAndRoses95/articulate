@@ -1,11 +1,11 @@
-#BUILD
+# BUILD
 
 - To build the project with local sources, use:
 ```
 dockker-compose -f docker-compose.yml -f build-compose-override.yml build api ui
 ```
 
-#DEPLOYMENT
+# DEPLOYMENT
 
 
  - Please set the following environment variables before running the project
